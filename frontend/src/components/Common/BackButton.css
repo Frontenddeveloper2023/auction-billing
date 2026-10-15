@@ -1,0 +1,58 @@
+.btn-back-section {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+/* When placed directly inside header-top without header-actions wrapper */
+.header-top > .btn-back-section {
+  margin-left: auto;
+}
+
+.btn-back-section:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: translateX(-2px);
+}
+
+.btn-back-section:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 550px) {
+  .btn-back-section {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+    height: 34px;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .btn-back-section {
+    padding: 5px 10px;
+    font-size: 0.775rem;
+    height: 32px;
+    gap: 4px;
+  }
+}
+

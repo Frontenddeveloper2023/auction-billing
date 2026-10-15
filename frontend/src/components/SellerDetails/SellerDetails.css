@@ -1,0 +1,230 @@
+/* SellerDetails.css */
+
+.clickable-card {
+    cursor: pointer;
+}
+
+.profile-container {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-tertiary);
+}
+
+.profile-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-left: 10px;
+}
+
+.status-toggle-btn {
+    min-width: 120px;
+}
+
+.sales-volume-row {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.sales-total-value {
+    font-size: 1.25rem;
+}
+
+.history-title {
+    margin-bottom: 1rem;
+}
+
+.history-table-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-table {
+    width: 100%;
+    font-size: 0.85rem;
+}
+
+.history-table td.empty-td {
+    text-align: center;
+    padding: 2rem;
+}
+
+.product-name-bold {
+    font-weight: 600;
+}
+
+@media (max-width: 370px) {
+    .profile-container {
+        padding: 0.75rem; 
+    }
+
+    .profile-info .data-row {
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .profile-info .data-label {
+        font-size: 0.75rem;
+    }
+
+    .profile-info .data-value {
+        font-size: 0.85rem;
+        text-align: right;
+    }
+
+    /* Reduce gap globally on small screens */
+    .content-body {
+        padding: 0.5rem;
+    }
+}
+
+.history-table-wrapper {
+    overflow-x: auto;
+}
+
+/* Tabs */
+.history-tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-button:hover {
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+/* Search Styles */
+.search-card {
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+}
+
+.search-form-group {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    height: 42px;
+    padding: 8px 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.925rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .search-card {
+        max-width: 100%;
+        margin-bottom: 1rem;
+        padding: 0.625rem 0.75rem;
+    }
+
+    .search-input {
+        height: 40px;
+        font-size: 0.875rem;
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* ── Form Validation ── */
+.input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+.input-error:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+.field-error {
+    display: block;
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    background: var(--bg-secondary);
+}
+
+.radio-label.checked {
+    border-color: var(--primary);
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.radio-label input {
+    cursor: pointer;
+}

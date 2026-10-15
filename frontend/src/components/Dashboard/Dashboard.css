@@ -1,0 +1,365 @@
+/* Dashboard.css */
+
+.db-stat-link {
+  text-decoration: none;
+  display: block;
+  height: 100%;
+}
+
+.sb-spinner-center {
+  margin: 0 auto;
+}
+
+.dashboard-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.filter-card {
+    margin-top: 1rem;
+}
+
+.filter-grid-custom {
+    grid-template-columns: 1fr 1fr;
+}
+
+.filter-grid-single {
+    grid-template-columns: 1fr;
+}
+
+.full-width-select, .full-width-input {
+    width: 100%;
+}
+
+.section-margin-top {
+    margin-top: 1.5rem;
+}
+
+/* Header Actions & Filter */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dashboard-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-dropdown-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 38px;
+    background-color: #fff;
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 8px; /* rounded-md */
+    padding: 0 0.5rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* shadow-sm */
+    transition: all 0.2s;
+}
+
+.filter-dropdown-wrapper:hover {
+    border-color: #9ca3af; /* gray-400 */
+}
+
+.filter-icon {
+    color: #6b7280; /* gray-500 */
+    margin-right: 0.25rem;
+}
+
+.dashboard-filter-select {
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151; /* gray-700 */
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 1.25rem; /* space for custom arrow if needed, but native usually fine for simple use */
+    /* Custom Arrow */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+    min-width: 0;
+}
+
+.custom-date-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    height: 38px;
+    padding: 0 0.75rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.calendar-icon {
+    color: #6b7280;
+    margin-right: 0.5rem;
+}
+
+.dashboard-date-input {
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: #374151;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .dashboard-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-grid-custom {
+        grid-template-columns: 1fr;
+    }
+
+    .header-top {
+       
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .header-actions {
+   
+        justify-content: space-between;
+    }
+
+    .dashboard-filter-container {
+        flex: 1;
+    }
+}
+
+/* Dashboard Stat Cards */
+.db-stat-card {
+    border-left: 3px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.db-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.db-stat-indigo { border-left-color: #6366f1; }
+.db-stat-icon-indigo {
+    background: rgba(99, 102, 241, 0.12) !important;
+    color: #6366f1 !important;
+}
+
+.db-stat-blue { border-left-color: #3b82f6; }
+.db-stat-icon-blue {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #3b82f6 !important;
+}
+
+.db-stat-green { border-left-color: #10b981; }
+.db-stat-icon-green {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #10b981 !important;
+}
+
+.db-stat-red { border-left-color: #ef4444; }
+.db-stat-icon-red {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #ef4444 !important;
+}
+
+.db-stat-amber { border-left-color: #f59e0b; }
+.db-stat-icon-amber {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #f59e0b !important;
+}
+
+.db-stat-purple { border-left-color: #a855f7; }
+.db-stat-icon-purple {
+    background: rgba(168, 85, 247, 0.12) !important;
+    color: #a855f7 !important;
+}
+
+/* ============================================================
+   Modern Dashboard Navigation Hub / Menu Grid (Screenshot 2 UI/UX)
+   ============================================================ */
+
+/* Centered dashboard header */
+.dashboard-header-center {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.dashboard-header-center h1 {
+  text-align: center !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.dashboard-menu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.25rem 0 2rem 0;
+}
+
+.dashboard-menu-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-menu-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0.75rem 0 0.65rem 0.25rem;
+}
+
+.dashboard-menu-section:first-child .dashboard-menu-heading {
+  margin-top: 0.15rem;
+}
+
+.dashboard-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-menu-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 98px;
+  height: 100%;
+  padding: 0.75rem 0.45rem 0.65rem 0.45rem;
+  background-color: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+}
+
+.dashboard-menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  border-color: #cbd5e1;
+}
+
+.dashboard-menu-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+/* Icon badge - medium small size, top center, no background color */
+.dashboard-menu-icon-box {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+  background: transparent !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-menu-card:hover .dashboard-menu-icon-box {
+  transform: scale(1.08);
+}
+
+/* Button title label - centered, full text displayed clearly with zero crop */
+.dashboard-menu-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.25;
+  text-align: center;
+  margin: 0;
+  width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+/* Color palettes - Icon color only, no bg color */
+.menu-theme-amber .dashboard-menu-icon-box {
+  color: #d97706;
+}
+
+.menu-theme-purple .dashboard-menu-icon-box {
+  color: #9333ea;
+}
+
+.menu-theme-blue .dashboard-menu-icon-box {
+  color: #2563eb;
+}
+
+.menu-theme-teal .dashboard-menu-icon-box {
+  color: #0d9488;
+}
+
+.menu-theme-pink .dashboard-menu-icon-box {
+  color: #db2777;
+}
+
+.menu-theme-orange .dashboard-menu-icon-box {
+  color: #ea580c;
+}
+
+.menu-theme-green .dashboard-menu-icon-box {
+  color: #16a34a;
+}
+
+.menu-theme-red .dashboard-menu-icon-box {
+  color: #dc2626;
+}
+
+.menu-theme-violet .dashboard-menu-icon-box {
+  color: #7c3aed;
+}
+
+.menu-theme-sky .dashboard-menu-icon-box {
+  color: #0284c7;
+}
+
+/* Responsiveness */
+@media (max-width: 340px) {
+  .dashboard-menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 580px) {
+  .dashboard-menu-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .dashboard-menu-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

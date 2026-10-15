@@ -1,0 +1,226 @@
+/* History.css */
+
+
+.clear-filters-btn {
+    margin-top: 0.5rem;
+}
+
+
+.filter-card-margin {
+    margin-top: 1rem;
+}
+
+.section-header-margin {
+    margin-top: 1.5rem;
+}
+
+.data-row-divider {
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+
+
+/* Search Box Styles */
+.search-icon-container {
+    position: relative;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper input {
+    padding-right: 35px;
+    width: 100%;
+}
+
+.search-icon-absolute {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+/* History Stat Cards */
+.hs-stat-card {
+    border-left: 3px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.hs-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.hs-stat-blue { border-left-color: #3b82f6; }
+.hs-stat-icon-blue {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #3b82f6 !important;
+}
+
+.hs-stat-green { border-left-color: #10b981; }
+.hs-stat-icon-green {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #10b981 !important;
+}
+
+.hs-stat-amber { border-left-color: #f59e0b; }
+.hs-stat-icon-amber {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #f59e0b !important;
+}
+
+/* History Table Styles */
+.hs-table {
+    border: none;
+}
+
+.hs-num-col {
+    text-align: right !important;
+}
+
+.cr-date-badge {
+    background: var(--bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.hs-qty-text {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.text-muted {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.ml-1 {
+    margin-left: 4px;
+}
+
+.empty-td {
+    padding: 4rem 1rem !important;
+}
+
+/* Responsive Table Scroll - Replaced with Dynamic Cards */
+.table-responsive {
+    width: 100%;
+}
+
+.hs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.hs-data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.hs-data-table .hs-th {
+    padding: 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
+    text-align: left;
+    background-color: var(--bg-tertiary);
+}
+
+.hs-data-table .hs-td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hs-data-table .hs-tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.hs-data-table .hs-tr:hover {
+    background-color: var(--bg-hover);
+}
+
+/* MOBILE CARD VIEW */
+@media (max-width: 570px) {
+    .hs-data-table,
+    .hs-data-table thead,
+    .hs-data-table tbody,
+    .hs-data-table th,
+    .hs-data-table td,
+    .hs-data-table tr {
+        display: block !important;
+    }
+
+    .hs-data-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .hs-data-table tr.hs-tr {
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 12px;
+        background-color: var(--bg-secondary);
+        border-radius: 10px;
+        padding: 4px 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .hs-data-table td.hs-td {
+        border: none;
+        border-bottom: 1px dashed var(--border-color);
+        position: relative;
+        padding-left: 45%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        text-align: right;
+        min-height: 40px;
+    }
+
+    .hs-data-table td.hs-td:last-child {
+        border-bottom: none;
+    }
+
+    .hs-data-table td.hs-td::before {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        width: 40%;
+        padding-right: 8px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(1)::before { content: "Date"; }
+    .hs-data-table td.hs-td:nth-of-type(2)::before { content: "Product"; }
+    .hs-data-table td.hs-td:nth-of-type(3)::before { content: "Seller"; }
+    .hs-data-table td.hs-td:nth-of-type(4)::before { content: "Buyer"; }
+    .hs-data-table td.hs-td:nth-of-type(5)::before { content: "Qty"; }
+    .hs-data-table td.hs-td:nth-of-type(6)::before { content: "Total"; }
+    .hs-data-table td.hs-td:nth-of-type(7)::before { content: "Comm."; }
+
+    .hs-num-col {
+        text-align: right !important;
+    }
+}

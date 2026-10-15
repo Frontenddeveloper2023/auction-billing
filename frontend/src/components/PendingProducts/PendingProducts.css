@@ -1,0 +1,245 @@
+.pending-products-container {
+    padding: 20px;
+}
+
+.pending-product-card {
+    border: 1px solid #ff9800; /* Orange border for warning/pending */
+    background-color: #fffaf0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.pending-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+}
+
+[data-theme="dark"] .pending-product-card {
+    background-color: rgba(245, 158, 11, 0.08);
+    border-color: #d97706;
+}
+
+.pending-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-pending-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.return-btn {
+    background-color: #ef4444; /* Red */
+    border-color: #ef4444;
+}
+
+.return-btn:hover {
+    background-color: #dc2626;
+}
+
+.back-today-btn {
+    background-color: #10b981; /* Green */
+    border-color: #10b981;
+}
+
+.back-today-btn:hover {
+    background-color: #059669;
+}
+
+.pending-badge {
+    background-color: #f59e0b;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.date-info {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+/* Search Box Styles */
+.search-icon-container {
+    position: relative;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper input {
+    padding-right: 40px;
+    width: 100%;
+}
+
+.search-icon-absolute {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pending-products-container {
+        padding: 12px 8px;
+    }
+
+    .pending-table,
+    .pending-table thead,
+    .pending-table tbody,
+    .pending-table th,
+    .pending-table td,
+    .pending-table tr {
+        display: block;
+    }
+
+    .pending-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .pending-product-card {
+        display: block;
+        width: 100%;
+        margin-bottom: 1.25rem;
+        background-color: #fffaf0;
+        border: 1px solid #ff9800;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 2px 10px rgba(255, 152, 0, 0.12);
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .pending-table td.custom-td {
+        border: none;
+        border-bottom: 1px solid rgba(255, 152, 0, 0.18);
+        position: relative;
+        padding: 12px 16px;
+        padding-left: 45%;
+        text-align: right;
+        display: block;
+        width: 100%;
+        min-height: 48px;
+        box-sizing: border-box;
+    }
+
+    .pending-table td.custom-td:last-child {
+        border-bottom: none;
+        padding: 38px 16px 14px 16px;
+    }
+
+    .pending-table td.custom-td:before {
+        position: absolute;
+        top: 12px;
+        left: 16px;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .pending-table td.custom-td-variants {
+        padding: 38px 16px 14px 16px;
+        text-align: left;
+    }
+
+    .pending-table td.custom-td-variants:before {
+        top: 12px;
+        left: 16px;
+        width: auto;
+    }
+
+    .pending-table td.custom-td-variants .product-variants {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .pending-table td.custom-td:last-child:before {
+        top: 14px;
+        left: 16px;
+        width: auto;
+    }
+
+    .pending-table td.custom-td .action-stack {
+        display: flex;
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .pending-table td.custom-td .action-stack .btn-pending-action {
+        width: 100%;
+        padding: 8px 16px;
+    }
+
+    .pending-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .pending-table td.custom-td:nth-of-type(1):before {
+        content: "Product Details";
+    }
+    .pending-table td.custom-td:nth-of-type(2):before {
+        content: "Seller & Date";
+    }
+    .pending-table td.custom-td:nth-of-type(3):before {
+        content: "Variants (Qty & Comm)";
+    }
+    .pending-table td.custom-td:nth-of-type(4):before {
+        content: "Actions";
+    }
+}
+
+@media (max-width: 480px) {
+    .pending-table td.custom-td {
+        padding: 10px 12px;
+        padding-left: 42%;
+        font-size: 0.875rem;
+    }
+
+    .pending-table td.custom-td:before {
+        left: 12px;
+        width: 38%;
+        font-size: 0.75rem;
+    }
+
+    .pending-table td.custom-td-variants {
+        padding: 34px 12px 12px 12px;
+    }
+
+    .pending-table td.custom-td-variants:before {
+        left: 12px;
+    }
+
+    .pending-table td.custom-td:last-child {
+        padding: 34px 12px 12px 12px;
+    }
+
+    .pending-table td.custom-td:last-child:before {
+        left: 12px;
+    }
+}

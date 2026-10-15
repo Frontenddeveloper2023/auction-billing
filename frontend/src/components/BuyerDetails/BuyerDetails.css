@@ -1,0 +1,391 @@
+/* BuyerDetails.css */
+
+.buyer-clickable-card {
+    cursor: pointer;
+}
+
+.buyer-type-badge-abs {
+    position: absolute;
+    top: 1rem;
+    right: 3.5rem;
+    font-size: 0.65rem;
+}
+
+.buyer-profile-container {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-tertiary);
+}
+
+.buyer-profile-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.buyer-profile-info {
+    flex: 1;
+}
+
+.buyer-profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-left: 10px;
+}
+
+.action-btn-fixed {
+    min-width: 120px;
+}
+
+.buyer-status-toggle-btn {
+    min-width: 120px;
+}
+
+.buyer-cursor-pointer {
+    cursor: pointer;
+}
+
+.volume-row {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.volume-value {
+    font-size: 1.25rem;
+}
+
+.history-title {
+    margin-bottom: 1rem;
+}
+
+.buyer-history-table-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.buyer-history-table {
+    width: 100%;
+    font-size: 0.85rem;
+}
+
+.empty-td {
+    text-align: center;
+    padding: 2rem;
+}
+
+.bold-product {
+    font-weight: 600;
+}
+.buyer-history-table-wrapper {
+    overflow-x: auto;
+}
+
+@media (max-width: 580px) {
+   
+    .buyer-profile-actions {
+        width: 100%;
+        align-items: stretch;
+    }
+    
+    .action-btn-fixed {
+        width: 100%;
+    }
+}
+
+/* Extracted Inline Styles */
+.buyer-search-card {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+}
+
+.buyer-search-form-group {
+    margin-bottom: 0;
+}
+
+.buyer-search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.payment-row {
+    margin-bottom: 1rem;
+}
+
+/* Tabs */
+.buyer-history-tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.buyer-tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.buyer-tab-button:hover {
+    color: var(--text-primary);
+}
+
+.buyer-tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+/* Utilities replacing inline styles */
+.input-group-relative {
+    position: relative;
+}
+
+.input-with-icon {
+    padding-right: 40px;
+    width: 100%;
+}
+
+.search-icon-absolute {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.table-total-label {
+    text-align: right;
+    font-weight: bold;
+}
+
+.table-total-value {
+    font-weight: bold;
+}
+
+.payment-modal-row {
+    margin-bottom: 1rem;
+}
+
+/* Product View Modal Styles */
+.product-view-container {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.product-view-row {
+    display: flex;
+    gap: 20px;
+}
+
+.product-info-details {
+    flex: 1;
+}
+
+.product-view-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.product-view-variant-header {
+    margin: 0 0 10px 0;
+}
+
+/* Buyer card & profile layout */
+.buyer-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.buyer-profile-mb {
+    margin-bottom: 2rem;
+}
+
+.buyer-profile-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.buyer-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-icon-mr {
+    margin-right: 5px;
+}
+
+.form-control-date {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.transaction-modal-overlay {
+    z-index: 999;
+}
+
+.buyer-back-link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.buyer-back-link-static {
+    cursor: default;
+    text-decoration: none;
+}
+
+.search-input-wrap {
+    position: relative;
+}
+
+.search-input-padded {
+    padding-right: 40px;
+    width: 100%;
+}
+
+.search-icon-pos {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.buyer-card-actions-inline {
+    display: flex;
+    gap: 5px;
+}
+
+.table-total-bold {
+    font-weight: bold;
+    color: black;
+}
+
+.optional-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.product-image-preview img {
+    object-fit: contain;
+    background-color: #f8f8f8;
+}
+
+.product-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    color: #9ca3af;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.stats-grid {
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+
+
+@media (max-width: 600px) {
+    .product-view-container > div {
+        flex-direction: column !important;
+    }
+    
+    .product-image-preview {
+        width: 100% !important;
+        flex: none !important;
+        margin-bottom: 1rem;
+    }
+    
+    .product-image-preview img, 
+    .product-image-placeholder {
+        height: 150px !important;
+        width: 100%;
+    }
+}
+
+/* ── Form Validation ── */
+.input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+.input-error:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+.field-error {
+    display: block;
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    background: var(--bg-secondary);
+}
+
+.radio-label.checked {
+    border-color: var(--primary);
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.radio-label input {
+    cursor: pointer;
+}

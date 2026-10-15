@@ -1,0 +1,497 @@
+/* ═══════════════════════════════════════════════════════════════
+   CommissionRecord.css – Professional Commission Dashboard
+   ═══════════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────────────────
+   1. GLOBAL COMMISSION BAR  (in header-top)
+───────────────────────────────────────────────────────────────── */
+.cr-global-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.35rem 0.5rem 0.35rem 0.75rem;
+    margin-left: auto;
+}
+
+.cr-global-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.cr-global-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cr-global-input {
+    width: 62px !important;
+    padding: 0.3rem 1.4rem 0.3rem 0.5rem !important;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cr-global-input:focus {
+    outline: none;
+    border-color: var(--primary-amber);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.cr-percent-badge {
+    position: absolute;
+    right: 7px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary-amber);
+    pointer-events: none;
+}
+
+.cr-save-btn {
+    gap: 0.3rem !important;
+    padding: 0.3rem 0.75rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* Read-only state – field looks locked */
+.cr-global-input--readonly {
+    cursor: default !important;
+    opacity: 0.75;
+    background-color: var(--bg-tertiary) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Neutral "Edit" button */
+.cr-edit-btn {
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    background: var(--bg-secondary) !important;
+    transition: background 0.2s, color 0.2s;
+}
+.cr-edit-btn:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   2. STAT CARDS  – coloured accent variants
+───────────────────────────────────────────────────────────────── */
+.cr-stat-card {
+    border-left: 3px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cr-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Amber – Total Commission */
+.cr-stat-amber { border-left-color: var(--primary-amber); }
+.cr-stat-icon-amber {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: var(--primary-amber) !important;
+}
+
+/* Blue – Transactions */
+.cr-stat-blue { border-left-color: #3b82f6; }
+.cr-stat-icon-blue {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #3b82f6 !important;
+}
+
+/* Green – Average */
+.cr-stat-green { border-left-color: #10b981; }
+.cr-stat-icon-green {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #10b981 !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   3. FILTER CARD
+───────────────────────────────────────────────────────────────── */
+.cr-filter-card {
+    margin-top: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: 10px;
+}
+
+.cr-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Search */
+.cr-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 150px;
+}
+
+.cr-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.cr-search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cr-search-input:focus {
+    outline: none;
+    border-color: var(--primary-amber);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Filter controls */
+.cr-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cr-select-wrap,
+.cr-date-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cr-select-icon,
+.cr-date-icon {
+    position: absolute;
+    left: 9px;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cr-select,
+.cr-date-input {
+    padding: 0.48rem 0.75rem 0.48rem 1.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.cr-select       { min-width: 118px; }
+.cr-date-input   { min-width: 128px; }
+
+.cr-select:focus,
+.cr-date-input:focus {
+    outline: none;
+    border-color: var(--primary-amber);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   4. SECTION HEADER with count chip
+───────────────────────────────────────────────────────────────── */
+.cr-section-header {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.cr-count-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--primary-amber);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   5. TABLE COLUMN HELPERS
+───────────────────────────────────────────────────────────────── */
+.cr-table-wrapper {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.cr-num-col    { text-align: right  !important; }
+.cr-center-col { text-align: center !important; }
+
+/* Highlighted "Earned" column header */
+.cr-highlight-col {
+    background: rgba(245, 158, 11, 0.05) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   6. TABLE CELL CONTENT STYLES
+───────────────────────────────────────────────────────────────── */
+.cr-product-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.cr-seller-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.cr-date-badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    white-space: nowrap;
+}
+
+.cr-sale-amount {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.cr-pct-badge {
+    font-size: 0.72rem !important;
+    padding: 0.2rem 0.55rem !important;
+}
+
+.cr-earned {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary-amber);
+    background: rgba(245, 158, 11, 0.06);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* Alternate row shading */
+.cr-row-even {
+    background-color: var(--bg-primary);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   7. TFOOT SUMMARY ROW
+───────────────────────────────────────────────────────────────── */
+.cr-tfoot-row {
+    background: linear-gradient(to right, var(--bg-tertiary), rgba(245,158,11,0.06));
+    border-top: 2px solid var(--border-color);
+}
+
+.cr-tfoot-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cr-tfoot-sales {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.cr-tfoot-earned {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary-amber);
+    letter-spacing: -0.01em;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   8. RESPONSIVE  ≤ 550 px
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 550px) {
+
+    /* Global bar – tighter */
+    .cr-global-bar {
+        padding: 0.3rem 0.4rem 0.3rem 0.6rem;
+        gap: 0.35rem;
+    }
+
+    .cr-global-label { display: none; }
+
+    /* Filters stack vertically */
+    .cr-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cr-search-wrap { width: 100%; }
+
+    .cr-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .cr-select,
+    .cr-date-input { flex: 1; }
+
+    /* Table → card-row layout */
+    .commission-table,
+    .commission-table thead,
+    .commission-table tbody,
+    .commission-table tfoot,
+    .commission-table th,
+    .commission-table td,
+    .commission-table tr {
+        display: block;
+    }
+
+    .commission-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .commission-table tr.custom-tr {
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 12px;
+        background-color: var(--bg-secondary);
+        border-radius: 10px;
+        padding: 4px 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .commission-table td.custom-td {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        padding-left: 46%;
+        padding-top: 11px;
+        padding-bottom: 11px;
+        text-align: right;
+    }
+
+    .commission-table td.custom-td:last-child {
+        border-bottom: none;
+    }
+
+    .commission-table td.custom-td::before {
+        position: absolute;
+        top: 11px;
+        left: 12px;
+        width: 40%;
+        padding-right: 8px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .commission-table td.custom-td:nth-of-type(1)::before { content: "Product"; }
+    .commission-table td.custom-td:nth-of-type(2)::before { content: "Seller"; }
+    .commission-table td.custom-td:nth-of-type(3)::before { content: "Date"; }
+    .commission-table td.custom-td:nth-of-type(4)::before { content: "Sale Amount"; }
+    .commission-table td.custom-td:nth-of-type(5)::before { content: "Comm %"; }
+    .commission-table td.custom-td:nth-of-type(6)::before { content: "Earned"; }
+
+    /* Fix center col alignment on mobile so the 10% badge floats properly right */
+    .commission-table td.custom-td.cr-center-col {
+        text-align: right !important;
+    }
+    .commission-table td.custom-td.cr-num-col {
+        text-align: right !important;
+    }
+
+    /* Highlight col on mobile – no bg */
+    .cr-highlight-col { background: transparent !important; }
+
+    /* tfoot on mobile */
+    .cr-tfoot-row {
+        border-radius: 10px;
+        margin-top: 4px;
+    }
+
+    .cr-tfoot-label  { display: none; }
+
+    .cr-tfoot-sales,
+    .cr-tfoot-earned {
+        padding-left: 46%;
+        text-align: right;
+        position: relative;
+    }
+
+    .cr-tfoot-sales::before  {
+        content: "Total Sales";
+        position: absolute;
+        top: 50%; left: 12px;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+    }
+
+    .cr-tfoot-earned::before {
+        content: "Total Earned";
+        position: absolute;
+        top: 50%; left: 12px;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--primary-amber);
+        font-weight: 700;
+        letter-spacing: 0.03em;
+    }
+}
+
+@media (max-width: 380px) {
+    .cr-global-input { width: 52px !important; }
+    
+    .commission-table td.custom-td {
+        padding-left: 35% !important;
+    }
+    
+    .commission-table td.custom-td::before {
+        width: 30% !important;
+        font-size: 0.7rem !important;
+        left: 10px !important;
+    }
+}

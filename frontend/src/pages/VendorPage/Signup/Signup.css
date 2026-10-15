@@ -1,0 +1,647 @@
+.signup-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.signup-container {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 1200px;
+    width: 100%;
+}
+
+.signup-container.plans-view {
+    max-width: 1100px;
+}
+
+.signup-container.form-view {
+    max-width: 900px;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Header */
+.section-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.section-header h1, .section-header h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+}
+
+.section-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    max-width: 500px;
+    margin: 0 auto;
+    font-weight: 450;
+}
+
+.section-header p strong {
+    color: #d97706;
+    font-weight: 600;
+}
+
+/* Plans Section */
+.plans-section {
+    padding-bottom: 2.5rem;
+    padding-top: 1rem;
+    padding-right:1rem;
+    padding-left: 1rem;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1.5rem 2rem;
+    max-width: 1080px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.plan-card {
+    background: #fff;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.plan-card:hover {
+    transform: translateY(-4px);
+    border-color: #f39c12;
+    box-shadow: 0 10px 20px rgba(243, 156, 18, 0.12);
+}
+
+.plan-card.selected {
+    border-color: #f39c12;
+    background: #fffdf9;
+}
+
+.popular-badge {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f39c12;
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.35);
+    z-index: 2;
+}
+
+.plan-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #333;
+}
+
+.plan-price {
+    margin-bottom: 1rem;
+}
+
+.plan-price .currency {
+    font-size: 1.25rem;
+    font-weight: 600;
+    vertical-align: top;
+    margin-right: 2px;
+}
+
+.plan-price .amount {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.plan-price .duration {
+    color: #777;
+    font-size: 0.875rem;
+}
+
+.plan-description {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 1.25rem;
+    line-height: 1.45;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    flex-grow: 1;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.65rem;
+    color: #444;
+    font-size: 0.875rem;
+}
+
+.plan-features li svg {
+    color: #27ae60;
+    flex-shrink: 0;
+}
+
+.select-plan-btn {
+    width: 100%;
+    margin-top: auto;
+    padding: 0.5rem 1rem;
+    background: #f3f3f3;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.plan-card:hover .select-plan-btn,
+.select-plan-btn:hover {
+    background: #f39c12;
+    color: #fff;
+}
+
+/* Details Section */
+.details-section {
+    padding: 0 2rem 2.5rem;
+    box-sizing: border-box;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #f39c12;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+.signup-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.form-subtitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.6rem;
+}
+
+.signup-page .form-group input, 
+.signup-page .form-group select, 
+.signup-page .form-group textarea {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    min-height: 40px;
+    border: 2px solid #eef0f2;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    background: #fbfbfc;
+    box-sizing: border-box;
+}
+
+.signup-page .form-group textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.signup-page .form-group input:focus, 
+.signup-page .form-group select:focus, 
+.signup-page .form-group textarea:focus {
+    border-color: #f39c12;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.05);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.submit-section {
+    margin-top: 1.75rem;
+    padding: 1.25rem 1.5rem;
+    background: #fdfdfd;
+    border: 2px dashed #eee;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.selected-plan-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+}
+
+.selected-plan-info strong {
+    color: #f39c12;
+}
+
+.submit-btn {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.65rem 1.25rem;
+    background: #2d3436;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: #f39c12;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(243, 156, 18, 0.2);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.terms-text {
+    margin-top: 1rem;
+    font-size: 0.76rem;
+    color: #999;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.form-error {
+    color: #e74c3c;
+    background: #fdf2f2;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    border-left: 4px solid #e74c3c;
+}
+
+.signup-loading {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #666;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.signup-footer-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+.signup-footer-links p {
+    font-size: 0.925rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.signup-footer-links a {
+    color: #f39c12;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.signup-footer-links a:hover {
+    color: #d68910;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .signup-page {
+        padding: 1.5rem 1rem;
+    }
+    .details-section {
+        padding: 0 1.5rem 2rem;
+    }
+    .signup-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .signup-page {
+        padding: 1rem 0.75rem;
+    }
+    .signup-container {
+        border-radius: 14px;
+    }
+    .plans-section {
+        padding: 0.75rem 0.75rem 1.75rem;
+    }
+    .plans-grid {
+        gap: 1rem;
+        padding: 0 0.5rem 1.25rem;
+    }
+    .details-section {
+        padding: 0 1.25rem 1.5rem;
+    }
+    .grid-2 {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .signup-page {
+        padding: 0.75rem 0.5rem;
+    }
+    .signup-container {
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .section-header {
+        margin-bottom: 1.25rem;
+        padding: 0 0.5rem;
+    }
+    .section-header h1, .section-header h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+    .section-header p {
+        font-size: 0.85rem;
+        line-height: 1.45;
+    }
+    .plans-grid { 
+        grid-template-columns: 1fr;
+        padding: 0 0.5rem 1.25rem; 
+        gap: 1rem;
+    }
+    .plan-card {
+        padding: 1.25rem 1.15rem;
+        border-radius: 10px;
+    }
+    .popular-badge {
+        top: -10px;
+        padding: 3px 12px;
+        font-size: 0.7rem;
+    }
+    .plan-price .amount {
+        font-size: 2rem;
+    }
+    .select-plan-btn {
+        height: 38px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .details-section { 
+        padding: 0.5rem 1rem 1.5rem; 
+    }
+    .back-btn {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+    .form-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.35rem;
+    }
+    .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    .signup-page .form-group input, 
+    .signup-page .form-group select, 
+    .signup-page .form-group textarea {
+        min-height: 38px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .submit-section {
+        margin-top: 1.25rem;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+    .submit-btn {
+        min-height: 40px;
+        font-size: 0.9rem;
+        padding: 0.55rem 1rem;
+    }
+
+    .signup-footer-links {
+        margin-top: 1.25rem;
+        padding: 0.4rem 0.75rem;
+    }
+    .signup-footer-links p {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .signup-page {
+        padding: 0.5rem 0.25rem;
+    }
+    .signup-container {
+        border-radius: 10px;
+    }
+    .section-header {
+        margin-bottom: 1rem;
+    }
+    .section-header h1, .section-header h2 {
+        font-size: 1.15rem;
+    }
+    .section-header p {
+        font-size: 0.8rem;
+    }
+    .plans-grid { 
+        padding: 0 0.25rem 1rem; 
+        gap: 0.85rem;
+    }
+    .plan-card {
+        padding: 1rem 0.85rem;
+    }
+    .popular-badge {
+        top: -9px;
+        padding: 2.5px 10px;
+        font-size: 0.65rem;
+        letter-spacing: 0.02em;
+    }
+    .plan-name {
+        font-size: 1.1rem;
+    }
+    .plan-price .amount {
+        font-size: 1.75rem;
+    }
+    .select-plan-btn {
+        height: 36px;
+        font-size: 0.825rem;
+        padding: 0.4rem 0.65rem;
+        gap: 6px;
+    }
+    .details-section {
+        padding: 0.5rem 0.75rem 1.25rem;
+    }
+    .form-group label {
+        font-size: 0.825rem;
+        gap: 6px;
+    }
+    .signup-page .form-group input, 
+    .signup-page .form-group select, 
+    .signup-page .form-group textarea {
+        min-height: 36px;
+        font-size: 0.825rem;
+        padding: 0.45rem 0.65rem;
+    }
+    .selected-plan-info {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.825rem;
+    }
+    .submit-section {
+        margin-top: 1rem;
+        padding: 0.85rem;
+    }
+    .submit-btn {
+        height: 38px;
+        min-height: 38px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .terms-text {
+        font-size: 0.72rem;
+    }
+    .signup-footer-links {
+        margin-top: 1rem;
+        padding: 0.35rem 0.5rem;
+    }
+    .signup-footer-links p {
+        font-size: 0.825rem;
+    }
+}
