@@ -292,7 +292,7 @@ function BuyerDetails() {
       if (
         selectedBuyer &&
         (selectedBuyer._id || selectedBuyer.id) ===
-          (editingBuyer._id || editingBuyer.id)
+        (editingBuyer._id || editingBuyer.id)
       ) {
         setSelectedBuyer((prev) => ({ ...prev, ...editingBuyer }));
       }
@@ -915,810 +915,820 @@ function BuyerDetails() {
             </div>
 
             {activeTab === "purchases" ? (
-              <div className="table-wrapper buyer-history-table-wrapper">
-                <table className="buyer-history-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Product</th>
-                      <th>Total Bill</th>
-                      <th>Paid</th>
-                      <th>Balance</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="empty-td">
-                          No purchases found for this date
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredProducts.map((p) => (
-                        <tr key={p.id}>
-                          <td>{formatDate(p.date)}</td>
-                          <td className="bold-product">
-                            {p.name || "Unknown"}
-                          </td>
-                          <td>₹{(p.totalGross || 0).toLocaleString()}</td>
-                          <td className="text-success">
-                            ₹{(p.totalPaid || 0).toLocaleString()}
-                          </td>
-                          <td
-                            className={`text-error ${p.totalBalance > 0 ? "font-bold" : ""}`}
+          <div className="table-wrapper buyer-history-table-wrapper">
+            <table className="buyer-history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Product</th>
+                  <th>Total Bill</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="empty-td">
+                      No purchases found for this date
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map((p) => (
+                    <tr key={p.id}>
+                      <td>{formatDate(p.date)}</td>
+                      <td className="bold-product">
+                        {p.name || "Unknown"}
+                      </td>
+                      <td>₹{(p.totalGross || 0).toLocaleString()}</td>
+                      <td className="text-success">
+                        ₹{(p.totalPaid || 0).toLocaleString()}
+                      </td>
+                      <td
+                        className={`text-error ${p.totalBalance > 0 ? "font-bold" : ""}`}
+                      >
+                        ₹{Math.max(0, p.totalBalance || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: "5px" }}>
+                          <button
+                            className="btn btn-sm btn-info"
+                            onClick={() => handleViewProduct(p.id)}
+                            title="View"
                           >
-                            ₹{Math.max(0, p.totalBalance || 0).toLocaleString()}
-                          </td>
-                          <td>
-                            <div style={{ display: "flex", gap: "5px" }}>
-                              <button
-                                className="btn btn-sm btn-info"
-                                onClick={() => handleViewProduct(p.id)}
-                                title="View"
-                              >
-                                <Eye size={16} />
-                              </button>
-                              {p.totalBalance > 0 && (
-                                <button
-                                  className="btn btn-sm btn-primary"
-                                  onClick={() => handlePayProduct(p)}
-                                  title="Pay"
-                                >
-                                  Pay
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                  {filteredProducts.length > 0 && (
-                    <tfoot
-                      style={{ background: "#f8f9fa", fontWeight: "bold" }}
-                    >
-                      <tr>
-                        <td colSpan="2">TOTAL</td>
-                        <td>₹{totalBills.toLocaleString()}</td>
-                        <td className="text-success">
-                          ₹{totalPaid.toLocaleString()}
-                        </td>
-                        <td className="text-error">
-                          ₹{totalBalance.toLocaleString()}
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
-              </div>
-            ) : (
-              <div className="table-wrapper buyer-history-table-wrapper">
-                <table className="buyer-history-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Debit (Buy)</th>
-                      <th>Credit (Pay)</th>
-                      <th>Balance</th>
+                            <Eye size={16} />
+                          </button>
+                          {p.totalBalance > 0 && (
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => handlePayProduct(p)}
+                              title="Pay"
+                            >
+                              Pay
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLedger.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="empty-td">
-                          No transactions found for this date
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredLedger.map((entry, index) => (
-                        <tr key={entry.id || index}>
-                          <td>
-                            {formatDateTime(entry.createdAt || entry.date)}
-                          </td>
-                          <td>{entry.description}</td>
-                          <td className="text-amber">
-                            {entry.debit > 0
-                              ? `₹${entry.debit.toLocaleString()}`
-                              : "-"}
-                          </td>
-                          <td className="text-success">
-                            {entry.credit > 0
-                              ? `₹${entry.credit.toLocaleString()}`
-                              : "-"}
-                          </td>
-                          <td style={{ fontWeight: "bold", color: "black" }}>
-                            {entry.balance < 0
-                              ? `Adv: ₹${Math.abs(entry.balance).toLocaleString()}`
-                              : `₹${entry.balance.toLocaleString()}`}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                  {filteredLedger.length > 0 && (
-                    <tfoot
-                      style={{ background: "#f8f9fa", fontWeight: "bold" }}
-                    >
-                      <tr>
-                        <td colSpan="4">CLOSING BALANCE</td>
-                        <td>
-                          {filteredLedger[filteredLedger.length - 1].balance < 0
-                            ? `Adv: ₹${Math.abs(filteredLedger[filteredLedger.length - 1].balance).toLocaleString()}`
-                            : `₹${filteredLedger[filteredLedger.length - 1].balance.toLocaleString()}`}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
-              </div>
-            )}
+                  ))
+                )}
+              </tbody>
+              {filteredProducts.length > 0 && (
+                <tfoot
+                  style={{ background: "#f8f9fa", fontWeight: "bold" }}
+                >
+                  <tr>
+                    <td colSpan="2">TOTAL</td>
+                    <td>₹{totalBills.toLocaleString()}</td>
+                    <td className="text-success">
+                      ₹{totalPaid.toLocaleString()}
+                    </td>
+                    <td className="text-error">
+                      ₹{totalBalance.toLocaleString()}
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        ) : (
+          <div className="table-wrapper buyer-history-table-wrapper">
+            <table className="buyer-history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Debit (Buy)</th>
+                  <th>Credit (Pay)</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLedger.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="empty-td">
+                      No transactions found for this date
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLedger.map((entry, index) => (
+                    <tr key={entry.id || index}>
+                      <td>
+                        {formatDateTime(entry.createdAt || entry.date)}
+                      </td>
+                      <td>{entry.description}</td>
+                      <td className="text-amber">
+                        {entry.debit > 0
+                          ? `₹${entry.debit.toLocaleString()}`
+                          : "-"}
+                      </td>
+                      <td className="text-success">
+                        {entry.credit > 0
+                          ? `₹${entry.credit.toLocaleString()}`
+                          : "-"}
+                      </td>
+                      <td style={{ fontWeight: "bold", color: "black" }}>
+                        {entry.balance < 0
+                          ? `Adv: ₹${Math.abs(entry.balance).toLocaleString()}`
+                          : `₹${entry.balance.toLocaleString()}`}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {filteredLedger.length > 0 && (
+                <tfoot
+                  style={{ background: "#f8f9fa", fontWeight: "bold" }}
+                >
+                  <tr>
+                    <td colSpan="4">CLOSING BALANCE</td>
+                    <td>
+                      {filteredLedger[filteredLedger.length - 1].balance < 0
+                        ? `Adv: ₹${Math.abs(filteredLedger[filteredLedger.length - 1].balance).toLocaleString()}`
+                        : `₹${filteredLedger[filteredLedger.length - 1].balance.toLocaleString()}`}
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
           </div>
         )}
       </div>
+        )}
+    </div >
 
-      {/* Record Payment Modal */}
-      {showRecordPaymentModal && selectedBuyer && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowRecordPaymentModal(false)}
-        >
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Pay In</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowRecordPaymentModal(false)}
-              >
-                <X />
-              </button>
-            </div>
-            <form onSubmit={handleRecordPayment}>
-              <div className="modal-body">
-                <div className="data-row payment-modal-row">
-                  <span className="data-label">Buyer Name</span>
-                  <span className="data-value">{selectedBuyer.name}</span>
-                </div>
-                <div className="data-row payment-modal-row">
-                  <span className="data-label">Outstanding Balance</span>
-                  <span className="data-value text-error">
-                    ₹{selectedBuyer.balance.toLocaleString()}
-                  </span>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Payment Date</label>
-                  <input
-                    type="date"
-                    value={paymentDate}
-                    onChange={(e) => setPaymentDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Description</label>
-                  <input
-                    type="text"
-                    value={paymentNote}
-                    onChange={(e) => setPaymentNote(e.target.value)}
-                    placeholder="e.g. Received via..."
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Payment Method</label>
-                  <select
-                    className="form-control"
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
-                    <option value="Cash">Cash</option>
-                    <option value="Gpay">Gpay</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Check">Check</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Amount (₹)</label>
-                  <input
-                    type="number"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value)}
-                    min="1"
-                    placeholder="Enter amount"
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowRecordPaymentModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Payment
-                </button>
-              </div>
-            </form>
+      {/* Record Payment Modal */ }
+  {
+    showRecordPaymentModal && selectedBuyer && (
+      <div
+        className="modal-overlay"
+        onClick={() => setShowRecordPaymentModal(false)}
+      >
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3 className="modal-title">Pay In</h3>
+            <button
+              className="modal-close"
+              onClick={() => setShowRecordPaymentModal(false)}
+            >
+              <X />
+            </button>
           </div>
-        </div>
-      )}
-
-      {/* Transaction View Modal */}
-      {showTransactionModal && viewingTransaction && (
-        <div
-          className="modal-overlay"
-          style={{ zIndex: 999 }}
-          onClick={() => setShowTransactionModal(false)}
-        >
-          <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Purchase Details</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowTransactionModal(false)}
-              >
-                <X />
-              </button>
-            </div>
+          <form onSubmit={handleRecordPayment}>
             <div className="modal-body">
-              <div
-                className="product-view-container"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}
-              >
-                <div className="product-view-summary">
-                  <div className="product-info-details">
-                    <div className="stats-grid product-stats-grid">
-                      <div className="product-stat-box">
-                        <span className="product-stat-label">Product Name</span>
-                        <b className="product-stat-val">{viewingTransaction.productName}</b>
-                      </div>
-                      <div className="product-stat-box">
-                        <span className="product-stat-label">Date</span>
-                        <b className="product-stat-val">{formatDate(viewingTransaction.date)}</b>
-                      </div>
-                      <div className="product-stat-box">
-                        <span className="product-stat-label">Bill Amount</span>
-                        <b className="product-stat-val">
-                          ₹{viewingTransaction.finalAmount?.toLocaleString()}
-                        </b>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <h4 style={{ margin: "0 0 10px 0" }}>Item Details</h4>
-                <div className="table-wrapper">
-                  <table className="buyer-history-table">
-                    <thead>
-                      <tr>
-                        <th>Variety</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {viewingTransaction.variantDetails ? (
-                        <tr>
-                          <td>{viewingTransaction.variantDetails.variety}</td>
-                          <td>
-                            {viewingTransaction.quantity}{" "}
-                            {viewingTransaction.variantDetails.unit}
-                          </td>
-                          <td>
-                            ₹{viewingTransaction.price}/
-                            {viewingTransaction.variantDetails.unit}
-                          </td>
-                          <td>
-                            ₹{viewingTransaction.finalAmount?.toLocaleString()}
-                          </td>
-                        </tr>
-                      ) : (
-                        <tr>
-                          <td colSpan="4">
-                            {viewingTransaction.details ? (
-                              <span>{viewingTransaction.details}</span>
-                            ) : (
-                              <span>
-                                Variant details not found (Legacy Record)
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="data-row payment-modal-row">
+                <span className="data-label">Buyer Name</span>
+                <span className="data-value">{selectedBuyer.name}</span>
+              </div>
+              <div className="data-row payment-modal-row">
+                <span className="data-label">Outstanding Balance</span>
+                <span className="data-value text-error">
+                  ₹{selectedBuyer.balance.toLocaleString()}
+                </span>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Payment Date</label>
+                <input
+                  type="date"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <input
+                  type="text"
+                  value={paymentNote}
+                  onChange={(e) => setPaymentNote(e.target.value)}
+                  placeholder="e.g. Received via..."
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Payment Method</label>
+                <select
+                  className="form-control"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Gpay">Gpay</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Check">Check</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Amount (₹)</label>
+                <input
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  min="1"
+                  placeholder="Enter amount"
+                  required
+                  autoFocus
+                />
               </div>
             </div>
             <div className="modal-footer">
               <button
+                type="button"
                 className="btn btn-secondary"
-                onClick={() => setShowTransactionModal(false)}
+                onClick={() => setShowRecordPaymentModal(false)}
               >
-                Close
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Save Payment
               </button>
             </div>
-          </div>
+          </form>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Add Buyer Modal */}
-      {showAddModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => {
-            setShowAddModal(false);
-            setBuyerFormErrors({});
-          }}
-        >
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Add New Buyer</h3>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowAddModal(false);
-                  setBuyerFormErrors({});
-                }}
-              >
-                <X />
-              </button>
-            </div>
-            <form onSubmit={handleAddBuyer}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Name *</label>
-                  <input
-                    type="text"
-                    value={newBuyer.name}
-                    onChange={(e) => {
-                      setNewBuyer({ ...newBuyer, name: e.target.value });
-                      setBuyerFormErrors((p) => ({ ...p, name: "" }));
-                    }}
-                    placeholder="Full Name"
-                    className={buyerFormErrors.name ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.name && (
-                    <small className="field-error">
-                      {buyerFormErrors.name}
-                    </small>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Phone Number *</label>
-                  <input
-                    type="tel"
-                    value={newBuyer.contact}
-                    onChange={(e) => {
-                      setNewBuyer({ ...newBuyer, contact: e.target.value });
-                      setBuyerFormErrors((p) => ({ ...p, contact: "" }));
-                    }}
-                    placeholder="10-digit Mobile Number"
-                    maxLength={10}
-                    className={buyerFormErrors.contact ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.contact && (
-                    <small className="field-error">
-                      {buyerFormErrors.contact}
-                    </small>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="form-label">
-                    Mail Id (Email){" "}
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={newBuyer.email}
-                    onChange={(e) => {
-                      setNewBuyer({ ...newBuyer, email: e.target.value });
-                      setBuyerFormErrors((p) => ({ ...p, email: "" }));
-                    }}
-                    placeholder="example@gmail.com"
-                    className={buyerFormErrors.email ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.email && (
-                    <small className="field-error">
-                      {buyerFormErrors.email}
-                    </small>
-                  )}
-                </div>
-                <div className="form-row-2col">
-                  <div className="form-group">
-                    <label className="form-label">State</label>
-                    <SearchableSelect
-                      name="state"
-                      value={newBuyer.state}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setNewBuyer((prev) => ({
-                          ...prev,
-                          state: val,
-                          city: "",
-                        }));
-                        fetchCities(val);
-                      }}
-                      placeholder={
-                        loadingStates ? "Loading..." : "Select State"
-                      }
-                      options={states.map((s) => ({
-                        label: s.name,
-                        value: s.name,
-                      }))}
-                      disabled={loadingStates}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">City</label>
-                    <SearchableSelect
-                      name="city"
-                      value={newBuyer.city}
-                      onChange={(e) =>
-                        setNewBuyer((prev) => ({
-                          ...prev,
-                          city: e.target.value,
-                        }))
-                      }
-                      placeholder={
-                        loadingCities
-                          ? "Loading cities..."
-                          : !newBuyer.state
-                            ? "Select state first"
-                            : "Select City"
-                      }
-                      options={cities.map((c) => ({
-                        label: c.name,
-                        value: c.name,
-                      }))}
-                      disabled={!newBuyer.state || loadingCities}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Address</label>
-                  <textarea
-                    value={newBuyer.address}
-                    onChange={(e) =>
-                      setNewBuyer({ ...newBuyer, address: e.target.value })
-                    }
-                    rows="2"
-                    placeholder="Street / Shop / Office details"
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowAddModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Add Buyer
-                </button>
-              </div>
-            </form>
+  {/* Transaction View Modal */ }
+  {
+    showTransactionModal && viewingTransaction && (
+      <div
+        className="modal-overlay"
+        style={{ zIndex: 999 }}
+        onClick={() => setShowTransactionModal(false)}
+      >
+        <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3 className="modal-title">Purchase Details</h3>
+            <button
+              className="modal-close"
+              onClick={() => setShowTransactionModal(false)}
+            >
+              <X />
+            </button>
           </div>
-        </div>
-      )}
-
-      {/* ── Edit Buyer Modal ── */}
-      {showEditBuyerModal && editingBuyer && (
-        <div
-          className="modal-overlay"
-          onClick={() => {
-            setShowEditBuyerModal(false);
-            setBuyerFormErrors({});
-          }}
-        >
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Edit Buyer</h3>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowEditBuyerModal(false);
-                  setBuyerFormErrors({});
-                }}
-              >
-                <X />
-              </button>
-            </div>
-            <form onSubmit={handleEditBuyer}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Name *</label>
-                  <input
-                    type="text"
-                    value={editingBuyer.name}
-                    onChange={(e) => {
-                      setEditingBuyer({
-                        ...editingBuyer,
-                        name: e.target.value,
-                      });
-                      setBuyerFormErrors((p) => ({ ...p, name: "" }));
-                    }}
-                    placeholder="Full Name"
-                    className={buyerFormErrors.name ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.name && (
-                    <small className="field-error">
-                      {buyerFormErrors.name}
-                    </small>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Number *</label>
-                  <input
-                    type="tel"
-                    value={editingBuyer.contact}
-                    onChange={(e) => {
-                      setEditingBuyer({
-                        ...editingBuyer,
-                        contact: e.target.value,
-                      });
-                      setBuyerFormErrors((p) => ({ ...p, contact: "" }));
-                    }}
-                    placeholder="10-digit Mobile Number"
-                    maxLength={10}
-                    className={buyerFormErrors.contact ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.contact && (
-                    <small className="field-error">
-                      {buyerFormErrors.contact}
-                    </small>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="form-label">
-                    Email{" "}
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={editingBuyer.email || ""}
-                    onChange={(e) => {
-                      setEditingBuyer({
-                        ...editingBuyer,
-                        email: e.target.value,
-                      });
-                      setBuyerFormErrors((p) => ({ ...p, email: "" }));
-                    }}
-                    placeholder="example@gmail.com"
-                    className={buyerFormErrors.email ? "input-error" : ""}
-                  />
-                  {buyerFormErrors.email && (
-                    <small className="field-error">
-                      {buyerFormErrors.email}
-                    </small>
-                  )}
-                </div>
-                <div className="form-row-2col">
-                  <div className="form-group">
-                    <label className="form-label">State</label>
-                    <SearchableSelect
-                      name="state"
-                      value={editingBuyer.state || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingBuyer((prev) => ({
-                          ...prev,
-                          state: val,
-                          city: "",
-                        }));
-                        fetchEditBuyerCities(val);
-                      }}
-                      placeholder={
-                        loadingStates ? "Loading..." : "Select State"
-                      }
-                      options={states.map((s) => ({
-                        label: s.name,
-                        value: s.name,
-                      }))}
-                      disabled={loadingStates}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">City</label>
-                    <SearchableSelect
-                      name="city"
-                      value={editingBuyer.city || ""}
-                      onChange={(e) =>
-                        setEditingBuyer((prev) => ({
-                          ...prev,
-                          city: e.target.value,
-                        }))
-                      }
-                      placeholder={
-                        loadingEditBuyerCities
-                          ? "Loading cities..."
-                          : !editingBuyer.state
-                            ? "Select state first"
-                            : "Select City"
-                      }
-                      options={editBuyerCities.map((c) => ({
-                        label: c.name,
-                        value: c.name,
-                      }))}
-                      disabled={!editingBuyer.state || loadingEditBuyerCities}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Address</label>
-                  <textarea
-                    value={editingBuyer.address || ""}
-                    onChange={(e) =>
-                      setEditingBuyer({
-                        ...editingBuyer,
-                        address: e.target.value,
-                      })
-                    }
-                    rows="2"
-                    placeholder="Street / Shop / Office details"
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditBuyerModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* ── Product View Modal ── */}
-      {showProductViewModal && viewingProduct && (
-        <div
-          className="modal-overlay"
-          style={{ zIndex: 999 }}
-          onClick={() => setShowProductViewModal(false)}
-        >
-          <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Product Details</h3>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <button
-                  className="modal-close"
-                  onClick={() => setShowProductViewModal(false)}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="modal-body">
-              <div
-                className="product-view-container"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}
-              >
-                <div style={{ display: "flex", gap: "20px" }}>
-                  <div className="product-info-details" style={{ flex: 1 }}>
-                    <div
-                      className="stats-grid"
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "10px",
-                        marginBottom: "20px",
-                        background: "#f8f9fa",
-                        padding: "15px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div>
-                        Product Name: <b>{viewingProduct.name}</b>
-                      </div>
-                      <div>
-                        Total Bill:{" "}
-                        <b>
-                          ₹
-                          {(viewingProduct.stats?.amount || 0).toLocaleString()}
-                        </b>
-                      </div>
-                      <div className="text-success">
-                        Total Paid:{" "}
-                        <b>
-                          ₹{(viewingProduct.stats?.paid || 0).toLocaleString()}
-                        </b>
-                      </div>
-                      <div className="text-error">
-                        Total Balance:{" "}
-                        <b>
-                          ₹
-                          {(
-                            viewingProduct.stats?.balance || 0
-                          ).toLocaleString()}
-                        </b>
-                      </div>
+          <div className="modal-body">
+            <div
+              className="product-view-container"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+              }}
+            >
+              <div className="product-view-summary">
+                <div className="product-info-details">
+                  <div className="stats-grid product-stats-grid">
+                    <div className="product-stat-box">
+                      <span className="product-stat-label">Product Name</span>
+                      <b className="product-stat-val">{viewingTransaction.productName}</b>
+                    </div>
+                    <div className="product-stat-box">
+                      <span className="product-stat-label">Date</span>
+                      <b className="product-stat-val">{formatDate(viewingTransaction.date)}</b>
+                    </div>
+                    <div className="product-stat-box">
+                      <span className="product-stat-label">Bill Amount</span>
+                      <b className="product-stat-val">
+                        ₹{viewingTransaction.finalAmount?.toLocaleString()}
+                      </b>
                     </div>
                   </div>
                 </div>
-                <h4 style={{ margin: "0 0 10px 0" }}>Variety Details</h4>
-                <div className="table-wrapper">
-                  <table className="buyer-history-table">
-                    <thead>
+              </div>
+              <h4 style={{ margin: "0 0 10px 0" }}>Item Details</h4>
+              <div className="table-wrapper">
+                <table className="buyer-history-table">
+                  <thead>
+                    <tr>
+                      <th>Variety</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewingTransaction.variantDetails ? (
                       <tr>
-                        <th>Variety</th>
-                        <th>Qty Purchased</th>
-                        <th>Total Amount</th>
+                        <td>{viewingTransaction.variantDetails.variety}</td>
+                        <td>
+                          {viewingTransaction.quantity}{" "}
+                          {viewingTransaction.variantDetails.unit}
+                        </td>
+                        <td>
+                          ₹{viewingTransaction.price}/
+                          {viewingTransaction.variantDetails.unit}
+                        </td>
+                        <td>
+                          ₹{viewingTransaction.finalAmount?.toLocaleString()}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {viewingProduct.variants
-                        .filter((v) => v.purchaseQuantity > 0)
-                        .map((v, idx) => (
-                          <tr key={idx}>
-                            <td>{v.variety}</td>
-                            <td>
-                              {v.purchaseQuantity || 0} {v.unit}
-                            </td>
-                            <td>₹{(v.stats?.amount || 0).toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      {viewingProduct.variants.filter(
-                        (v) => v.purchaseQuantity > 0,
-                      ).length === 0 && (
+                    ) : (
+                      <tr>
+                        <td colSpan="4">
+                          {viewingTransaction.details ? (
+                            <span>{viewingTransaction.details}</span>
+                          ) : (
+                            <span>
+                              Variant details not found (Legacy Record)
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowTransactionModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  {/* Add Buyer Modal */ }
+  {
+    showAddModal && (
+      <div
+        className="modal-overlay"
+        onClick={() => {
+          setShowAddModal(false);
+          setBuyerFormErrors({});
+        }}
+      >
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3 className="modal-title">Add New Buyer</h3>
+            <button
+              className="modal-close"
+              onClick={() => {
+                setShowAddModal(false);
+                setBuyerFormErrors({});
+              }}
+            >
+              <X />
+            </button>
+          </div>
+          <form onSubmit={handleAddBuyer}>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Name *</label>
+                <input
+                  type="text"
+                  value={newBuyer.name}
+                  onChange={(e) => {
+                    setNewBuyer({ ...newBuyer, name: e.target.value });
+                    setBuyerFormErrors((p) => ({ ...p, name: "" }));
+                  }}
+                  placeholder="Full Name"
+                  className={buyerFormErrors.name ? "input-error" : ""}
+                />
+                {buyerFormErrors.name && (
+                  <small className="field-error">
+                    {buyerFormErrors.name}
+                  </small>
+                )}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number *</label>
+                <input
+                  type="tel"
+                  value={newBuyer.contact}
+                  onChange={(e) => {
+                    setNewBuyer({ ...newBuyer, contact: e.target.value });
+                    setBuyerFormErrors((p) => ({ ...p, contact: "" }));
+                  }}
+                  placeholder="10-digit Mobile Number"
+                  maxLength={10}
+                  className={buyerFormErrors.contact ? "input-error" : ""}
+                />
+                {buyerFormErrors.contact && (
+                  <small className="field-error">
+                    {buyerFormErrors.contact}
+                  </small>
+                )}
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Mail Id (Email){" "}
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    (optional)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={newBuyer.email}
+                  onChange={(e) => {
+                    setNewBuyer({ ...newBuyer, email: e.target.value });
+                    setBuyerFormErrors((p) => ({ ...p, email: "" }));
+                  }}
+                  placeholder="example@gmail.com"
+                  className={buyerFormErrors.email ? "input-error" : ""}
+                />
+                {buyerFormErrors.email && (
+                  <small className="field-error">
+                    {buyerFormErrors.email}
+                  </small>
+                )}
+              </div>
+              <div className="form-row-2col">
+                <div className="form-group">
+                  <label className="form-label">State</label>
+                  <SearchableSelect
+                    name="state"
+                    value={newBuyer.state}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewBuyer((prev) => ({
+                        ...prev,
+                        state: val,
+                        city: "",
+                      }));
+                      fetchCities(val);
+                    }}
+                    placeholder={
+                      loadingStates ? "Loading..." : "Select State"
+                    }
+                    options={states.map((s) => ({
+                      label: s.name,
+                      value: s.name,
+                    }))}
+                    disabled={loadingStates}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">City</label>
+                  <SearchableSelect
+                    name="city"
+                    value={newBuyer.city}
+                    onChange={(e) =>
+                      setNewBuyer((prev) => ({
+                        ...prev,
+                        city: e.target.value,
+                      }))
+                    }
+                    placeholder={
+                      loadingCities
+                        ? "Loading cities..."
+                        : !newBuyer.state
+                          ? "Select state first"
+                          : "Select City"
+                    }
+                    options={cities.map((c) => ({
+                      label: c.name,
+                      value: c.name,
+                    }))}
+                    disabled={!newBuyer.state || loadingCities}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Address</label>
+                <textarea
+                  value={newBuyer.address}
+                  onChange={(e) =>
+                    setNewBuyer({ ...newBuyer, address: e.target.value })
+                  }
+                  rows="2"
+                  placeholder="Street / Shop / Office details"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Add Buyer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  {/* ── Edit Buyer Modal ── */ }
+  {
+    showEditBuyerModal && editingBuyer && (
+      <div
+        className="modal-overlay"
+        onClick={() => {
+          setShowEditBuyerModal(false);
+          setBuyerFormErrors({});
+        }}
+      >
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3 className="modal-title">Edit Buyer</h3>
+            <button
+              className="modal-close"
+              onClick={() => {
+                setShowEditBuyerModal(false);
+                setBuyerFormErrors({});
+              }}
+            >
+              <X />
+            </button>
+          </div>
+          <form onSubmit={handleEditBuyer}>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Name *</label>
+                <input
+                  type="text"
+                  value={editingBuyer.name}
+                  onChange={(e) => {
+                    setEditingBuyer({
+                      ...editingBuyer,
+                      name: e.target.value,
+                    });
+                    setBuyerFormErrors((p) => ({ ...p, name: "" }));
+                  }}
+                  placeholder="Full Name"
+                  className={buyerFormErrors.name ? "input-error" : ""}
+                />
+                {buyerFormErrors.name && (
+                  <small className="field-error">
+                    {buyerFormErrors.name}
+                  </small>
+                )}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Contact Number *</label>
+                <input
+                  type="tel"
+                  value={editingBuyer.contact}
+                  onChange={(e) => {
+                    setEditingBuyer({
+                      ...editingBuyer,
+                      contact: e.target.value,
+                    });
+                    setBuyerFormErrors((p) => ({ ...p, contact: "" }));
+                  }}
+                  placeholder="10-digit Mobile Number"
+                  maxLength={10}
+                  className={buyerFormErrors.contact ? "input-error" : ""}
+                />
+                {buyerFormErrors.contact && (
+                  <small className="field-error">
+                    {buyerFormErrors.contact}
+                  </small>
+                )}
+              </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Email{" "}
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    (optional)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={editingBuyer.email || ""}
+                  onChange={(e) => {
+                    setEditingBuyer({
+                      ...editingBuyer,
+                      email: e.target.value,
+                    });
+                    setBuyerFormErrors((p) => ({ ...p, email: "" }));
+                  }}
+                  placeholder="example@gmail.com"
+                  className={buyerFormErrors.email ? "input-error" : ""}
+                />
+                {buyerFormErrors.email && (
+                  <small className="field-error">
+                    {buyerFormErrors.email}
+                  </small>
+                )}
+              </div>
+              <div className="form-row-2col">
+                <div className="form-group">
+                  <label className="form-label">State</label>
+                  <SearchableSelect
+                    name="state"
+                    value={editingBuyer.state || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingBuyer((prev) => ({
+                        ...prev,
+                        state: val,
+                        city: "",
+                      }));
+                      fetchEditBuyerCities(val);
+                    }}
+                    placeholder={
+                      loadingStates ? "Loading..." : "Select State"
+                    }
+                    options={states.map((s) => ({
+                      label: s.name,
+                      value: s.name,
+                    }))}
+                    disabled={loadingStates}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">City</label>
+                  <SearchableSelect
+                    name="city"
+                    value={editingBuyer.city || ""}
+                    onChange={(e) =>
+                      setEditingBuyer((prev) => ({
+                        ...prev,
+                        city: e.target.value,
+                      }))
+                    }
+                    placeholder={
+                      loadingEditBuyerCities
+                        ? "Loading cities..."
+                        : !editingBuyer.state
+                          ? "Select state first"
+                          : "Select City"
+                    }
+                    options={editBuyerCities.map((c) => ({
+                      label: c.name,
+                      value: c.name,
+                    }))}
+                    disabled={!editingBuyer.state || loadingEditBuyerCities}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Address</label>
+                <textarea
+                  value={editingBuyer.address || ""}
+                  onChange={(e) =>
+                    setEditingBuyer({
+                      ...editingBuyer,
+                      address: e.target.value,
+                    })
+                  }
+                  rows="2"
+                  placeholder="Street / Shop / Office details"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowEditBuyerModal(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+  {/* ── Product View Modal ── */ }
+  {
+    showProductViewModal && viewingProduct && (
+      <div
+        className="modal-overlay"
+        style={{ zIndex: 999 }}
+        onClick={() => setShowProductViewModal(false)}
+      >
+        <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3 className="modal-title">Product Details</h3>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            >
+              <button
+                className="modal-close"
+                onClick={() => setShowProductViewModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          <div className="modal-body">
+            <div
+              className="product-view-container"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+              }}
+            >
+              <div style={{ display: "flex", gap: "20px" }}>
+                <div className="product-info-details" style={{ flex: 1 }}>
+                  <div
+                    className="stats-grid"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "10px",
+                      marginBottom: "20px",
+                      background: "#f8f9fa",
+                      padding: "15px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <div>
+                      Product Name: <b>{viewingProduct.name}</b>
+                    </div>
+                    <div>
+                      Total Bill:{" "}
+                      <b>
+                        ₹
+                        {(viewingProduct.stats?.amount || 0).toLocaleString()}
+                      </b>
+                    </div>
+                    <div className="text-success">
+                      Total Paid:{" "}
+                      <b>
+                        ₹{(viewingProduct.stats?.paid || 0).toLocaleString()}
+                      </b>
+                    </div>
+                    <div className="text-error">
+                      Total Balance:{" "}
+                      <b>
+                        ₹
+                        {(
+                          viewingProduct.stats?.balance || 0
+                        ).toLocaleString()}
+                      </b>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <h4 style={{ margin: "0 0 10px 0" }}>Variety Details</h4>
+              <div className="table-wrapper">
+                <table className="buyer-history-table">
+                  <thead>
+                    <tr>
+                      <th>Variety</th>
+                      <th>Qty Purchased</th>
+                      <th>Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewingProduct.variants
+                      .filter((v) => v.purchaseQuantity > 0)
+                      .map((v, idx) => (
+                        <tr key={idx}>
+                          <td>{v.variety}</td>
+                          <td>
+                            {v.purchaseQuantity || 0} {v.unit}
+                          </td>
+                          <td>₹{(v.stats?.amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    {viewingProduct.variants.filter(
+                      (v) => v.purchaseQuantity > 0,
+                    ).length === 0 && (
                         <tr>
                           <td colSpan="3" className="text-center">
                             No purchased variants found
                           </td>
                         </tr>
                       )}
-                    </tbody>
-                  </table>
-                </div>
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowProductViewModal(false)}
-              >
-                Close
-              </button>
-            </div>
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowProductViewModal(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
-      )}
+      </div>
+    )
+  }
     </>
   );
 }

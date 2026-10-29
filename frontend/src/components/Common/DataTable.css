@@ -29,10 +29,10 @@
 }
 
 /* Failsafe: if wrapped inside any card-list grid, force 100% full span */
-.card-list > .table-responsive,
-.card-list > .custom-table-wrapper,
-.card-list > .table-container-full,
-.card-list > table {
+.card-list>.table-responsive,
+.card-list>.custom-table-wrapper,
+.card-list>.table-container-full,
+.card-list>table {
   grid-column: 1 / -1 !important;
   width: 100% !important;
 }
@@ -76,6 +76,7 @@
 }
 
 @media (min-width: 551px) {
+
   .data-table,
   .custom-data-table {
     min-width: 580px;
@@ -199,6 +200,7 @@
    Transforms each table row into an individual, executive-styled record card
    ────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 550px) {
+
   /* Unwrap table container on mobile so cards float cleanly with margin */
   .custom-table-wrapper,
   .table-responsive {
@@ -314,9 +316,9 @@
   }
 
   /* Right-aligned cell values */
-  .data-table td > *,
-  .custom-data-table td > *,
-  .custom-data-table td.custom-td > * {
+  .data-table td>*,
+  .custom-data-table td>*,
+  .custom-data-table td.custom-td>* {
     max-width: 100% !important;
   }
 
@@ -363,6 +365,7 @@
    7. TINY SCREEN PROTECTION (≤ 380px down to 320px)
    ────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 380px) {
+
   .data-table td,
   .custom-data-table td,
   .custom-data-table td.custom-td {

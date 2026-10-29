@@ -9,16 +9,22 @@
   --accent-gold: #fbbf24;
 
   /* 🌤️ Light Backgrounds */
-  --bg-primary: #f8fafc;        /* Page background */
-  --bg-secondary: #ffffff;      /* Main panels */
-  --bg-tertiary: #f1f5f9;       /* Table headers / inputs */
+  --bg-primary: #f8fafc;
+  /* Page background */
+  --bg-secondary: #ffffff;
+  /* Main panels */
+  --bg-tertiary: #f1f5f9;
+  /* Table headers / inputs */
   --bg-card: #ffffff;
   --bg-hover: #dadada;
 
   /* 📝 Text Colors */
-  --text-primary: #0f172a;      /* Headings */
-  --text-secondary: #334155;    /* Normal text */
-  --text-muted: #64748b;        /* Labels / muted */
+  --text-primary: #0f172a;
+  /* Headings */
+  --text-secondary: #334155;
+  /* Normal text */
+  --text-muted: #64748b;
+  /* Labels / muted */
 
   /* 🧱 Borders & Dividers */
   --border-color: #e2e8f0;
@@ -75,7 +81,8 @@ html {
 }
 
 body {
-  background-color: #e5e7eb; /* Outer background */
+  background-color: #e5e7eb;
+  /* Outer background */
   color: var(--text-primary);
   line-height: 1.6;
   display: flex;
@@ -88,8 +95,10 @@ body {
 
 #root {
   width: 100%;
-  max-width: 768px; /* Mobile/Tablet max */
-  min-width: 325px; /* Minimum mobile */
+  max-width: 768px;
+  /* Mobile/Tablet max */
+  min-width: 325px;
+  /* Minimum mobile */
   background-color: var(--bg-primary);
   min-height: calc(100vh - 2rem);
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
@@ -100,18 +109,40 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-primary);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
-h5 { font-size: 1.125rem; }
-h6 { font-size: 1rem; }
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.125rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
 
 p {
   color: var(--text-secondary);
@@ -137,8 +168,13 @@ p {
 }
 
 /* Utility Classes */
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
 
 /* ============================================================
    Professional Back Navigation Styles
@@ -214,14 +250,34 @@ p {
 .subpage-back-btn:active {
   transform: scale(0.96);
 }
-.text-muted { color: var(--text-muted); }
-.text-amber { color: var(--primary-amber); }
-.text-success { color: var(--success); }
-.text-error { color: var(--error); }
 
-.bg-primary { background-color: var(--bg-primary); }
-.bg-secondary { background-color: var(--bg-secondary); }
-.bg-card { background-color: var(--bg-card); }
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-amber {
+  color: var(--primary-amber);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-card {
+  background-color: var(--bg-card);
+}
 
 /* Button Styles */
 button {
@@ -242,9 +298,10 @@ button {
   gap: 0.5rem;
   transition: all var(--transition-base);
 }
+
 @media(min-width: 480px) {
   .btn {
-        padding: 0.625rem 1.25rem;
+    padding: 0.625rem 1.25rem;
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 0.875rem;
@@ -368,7 +425,9 @@ button {
 }
 
 /* Input Styles */
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 0.625rem 0.875rem;
   background-color: var(--bg-tertiary);
@@ -386,19 +445,21 @@ input, select, textarea {
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 } */
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   outline: none;
   border-color: var(--primary-amber);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--text-muted);
 }
 
 /* Hide scrollbar/spinners for number inputs */
 /* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button, 
+input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
@@ -431,7 +492,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 0.3rem;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
@@ -488,6 +550,7 @@ tr:hover {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -503,6 +566,7 @@ tr:hover {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -524,8 +588,13 @@ tr:hover {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin {

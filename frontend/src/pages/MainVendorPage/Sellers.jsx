@@ -187,9 +187,8 @@ function Sellers() {
                     <div className="data-row">
                       <span className="data-label">Status</span>
                       <span
-                        className={`badge ${
-                          seller.status === "inactive" ? "badge-error" : "badge-success"
-                        }`}
+                        className={`badge ${seller.status === "inactive" ? "badge-error" : "badge-success"
+                          }`}
                         style={{
                           marginLeft: "auto",
                           width: "fit-content",
@@ -202,32 +201,32 @@ function Sellers() {
                           justifyContent: "center",
                         }}
                       >
-                        {seller.status === "inactive" ? "Disabled" : "Enabled"}
-                      </span>
-                    </div>
+                      {seller.status === "inactive" ? "Disabled" : "Enabled"}
+                    </span>
                   </div>
                 </div>
+                </div>
               ))}
-            </div>
+          </div>
 
-            {filteredSellers.length === 0 && (
-              <div className="empty-state" style={{ textAlign: "center", padding: "3rem" }}>
-                <div className="empty-state-icon" style={{ fontSize: "3rem", marginBottom: "1rem" }}>👥</div>
-                <p>No sellers found.</p>
-              </div>
-            )}
-          </>
+        {filteredSellers.length === 0 && (
+          <div className="empty-state" style={{ textAlign: "center", padding: "3rem" }}>
+            <div className="empty-state-icon" style={{ fontSize: "3rem", marginBottom: "1rem" }}>👥</div>
+            <p>No sellers found.</p>
+          </div>
+        )}
+      </>
         )}
 
-        <ConfirmationModal
-          isOpen={confirmInfo.isOpen}
-          onClose={handleConfirmClose}
-          title="Delete Seller"
-          message="Are you sure you want to delete this seller?"
-          onConfirm={handleConfirm}
-        />
-      </div>
+      <ConfirmationModal
+        isOpen={confirmInfo.isOpen}
+        onClose={handleConfirmClose}
+        title="Delete Seller"
+        message="Are you sure you want to delete this seller?"
+        onConfirm={handleConfirm}
+      />
     </div>
+    </div >
   );
 }
 

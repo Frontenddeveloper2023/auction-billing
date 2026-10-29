@@ -271,80 +271,80 @@ const VendorLogin = () => {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-                fontSize: "13px",
+            alignItems: "center",
+            marginBottom: "16px",
+            fontSize: "13px",
               }}
             >
-              <button
-                type="button"
-                onClick={() => {
-                  setStep(1);
-                  setOtp("");
-                  setError("");
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#64748b",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <ArrowLeft size={14} /> Change Email
-              </button>
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={isResending}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#F39C12",
-                  fontWeight: "600",
-                  cursor: isResending ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <RefreshCw size={14} className={isResending ? "animate-spin" : ""} /> Resend Code
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setOtp("");
+                setError("");
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#64748b",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <ArrowLeft size={14} /> Change Email
+            </button>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              disabled={isResending}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#F39C12",
+                fontWeight: "600",
+                cursor: isResending ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <RefreshCw size={14} className={isResending ? "animate-spin" : ""} /> Resend Code
+            </button>
+          </div>
 
             {error && <div className="error-msg">{error}</div>}
 
-            <button
-              type="submit"
-              className="btn btn-primary login-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="saas-spinner login-spinner" size={18} />{" "}
-                  Verifying...
-                </>
-              ) : (
-                "Verify & Login"
-              )}
-            </button>
-          </form>
+        <button
+          type="submit"
+          className="btn btn-primary login-btn"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader className="saas-spinner login-spinner" size={18} />{" "}
+              Verifying...
+            </>
+          ) : (
+            "Verify & Login"
+          )}
+        </button>
+      </form>
         )}
 
-        {loginType === "main" && step === 1 && (
-          <div className="login-footer">
-            <p className="signup-link-text">
-              Don't have an account?{" "}
-              <Link to="/signup" className="signup-link">
-                Request Vendor Access
-              </Link>
-            </p>
-          </div>
-        )}
-      </div>
+      {loginType === "main" && step === 1 && (
+        <div className="login-footer">
+          <p className="signup-link-text">
+            Don't have an account?{" "}
+            <Link to="/signup" className="signup-link">
+              Request Vendor Access
+            </Link>
+          </p>
+        </div>
+      )}
     </div>
+    </div >
   );
 };
 

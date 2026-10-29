@@ -156,6 +156,7 @@
   height: 16px;
   border-radius: 50%;
 }
+
 .variety-tag-remove:hover {
   background-color: rgba(239, 68, 68, 0.1);
 }
@@ -175,7 +176,8 @@
 }
 
 .toggle-switch:hover {
-  background-color: rgba(0, 0, 0, 0.05); /* Subtle hover background */
+  background-color: rgba(0, 0, 0, 0.05);
+  /* Subtle hover background */
 }
 
 .toggle-switch input {
@@ -191,12 +193,15 @@
   display: inline-block;
   width: 50px;
   height: 28px;
-  background-color: #e5e7eb; /* Light gray for OFF state */
+  background-color: #e5e7eb;
+  /* Light gray for OFF state */
   border-radius: 34px;
-  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
+  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Smoother transition */
   border: 1px solid #d1d5db;
   margin-right: 12px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); /* Inner shadow for depth */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  /* Inner shadow for depth */
 }
 
 /* The Knob */
@@ -210,16 +215,18 @@
   background-color: white;
   border-radius: 50%;
   transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Drop shadow for the knob */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  /* Drop shadow for the knob */
 }
 
 /* Checked State */
-.toggle-switch input:checked + .slider {
-  background-color: #10b981; /* Success Green for ON state */
+.toggle-switch input:checked+.slider {
+  background-color: #10b981;
+  /* Success Green for ON state */
   border-color: #059669;
 }
 
-.toggle-switch input:checked + .slider:before {
+.toggle-switch input:checked+.slider:before {
   transform: translateX(22px);
 }
 
@@ -232,8 +239,9 @@
   letter-spacing: 0.01em;
 }
 
-.toggle-switch input:checked ~ .toggle-label {
-  color: var(--text-primary); /* Darker text when active */
+.toggle-switch input:checked~.toggle-label {
+  color: var(--text-primary);
+  /* Darker text when active */
 }
 
 .toggle-switch:hover .toggle-label {
@@ -253,10 +261,12 @@
 }
 
 .variety-tag.variety-disabled {
-  background: var(--bg-tertiary); /* Use tertiary for disabled */
+  background: var(--bg-tertiary);
+  /* Use tertiary for disabled */
   color: var(--text-secondary);
   border-color: var(--border-color);
-  text-decoration: line-through; /* Visual cue */
+  text-decoration: line-through;
+  /* Visual cue */
 }
 
 .variety-toggle {
@@ -279,7 +289,8 @@
 /* Responsive adjustments for 325px and up */
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: 1fr; /* Single column on small screens */
+    grid-template-columns: 1fr;
+    /* Single column on small screens */
   }
 
   .data-card-header {
@@ -288,7 +299,7 @@
   }
 
   .action-buttons {
-  
+
     display: flex;
     justify-content: flex-end;
   }
@@ -329,7 +340,7 @@
   }
 
   .header-actions {
-   
+
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -527,7 +538,8 @@
 }
 
 .variant-box {
-  background: rgba(255, 255, 255, 0.05); /* or var(--bg-tertiary) */
+  background: rgba(255, 255, 255, 0.05);
+  /* or var(--bg-tertiary) */
   padding: 8px;
   border-radius: 4px;
   margin-bottom: 4px;
@@ -763,6 +775,7 @@
    TODAY AUCTION - MODERN ATTRACTIVE MOBILE CARD SYSTEM (≤ 550px)
    ========================================================================== */
 @media (max-width: 550px) {
+
   /* Card Container */
   .today-auction-table tr.custom-tr {
     display: grid !important;
@@ -1240,8 +1253,13 @@
 }
 
 @keyframes todayAuctionModalFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
@@ -1265,6 +1283,7 @@
     transform: scale(0.97) translateY(8px);
     opacity: 0;
   }
+
   to {
     transform: scale(1) translateY(0);
     opacity: 1;

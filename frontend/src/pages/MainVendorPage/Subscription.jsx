@@ -126,7 +126,11 @@ const Subscription = () => {
   };
 
   useEffect(() => {
-    currentVendorId ? fetchData() : setLoading(false);
+    const params = new URLSearchParams(window.location.search);
+    const hasOrderId = !!params.get("order_id");
+    if (!hasOrderId) {
+      currentVendorId ? fetchData() : setLoading(false);
+    }
   }, [currentVendorId]);
 
   const calculateDaysRemaining = () => {
@@ -170,8 +174,9 @@ const Subscription = () => {
 
     if (orderId && savedUpgradeStr) {
       sessionStorage.removeItem("pending_upgrade_data");
+      // Set loading to true immediately so user sees loader right away
+      setLoading(true);
       try {
-        setLoading(true);
         const savedData = JSON.parse(savedUpgradeStr);
         const res = await verifyAndUpgradePlan({
           orderId,
@@ -180,13 +185,14 @@ const Subscription = () => {
         });
 
         if (res.status) {
+          // Immediately show success toast and confirmation modal
           toast.success("Plan Upgraded Successfully!", { autoClose: 5000 });
-          // Refresh page data immediately
-          await fetchData();
           setConfirmModal({
             isOpen: true,
             title: "Plan Upgraded Successfully!",
-            message: res.message || "Your new plan is now active! All new features and limits are available immediately.",
+            message:
+              res.message ||
+              "Your new plan is now active! All new features and limits are available immediately.",
             variant: "success",
             onConfirm: () => {
               setConfirmModal((prev) => ({ ...prev, isOpen: false }));
@@ -194,15 +200,23 @@ const Subscription = () => {
             showCancel: false,
             confirmText: "Great!",
           });
+          // Refresh data in background without blocking the immediate success feedback
+          fetchData();
         } else {
           toast.error(res.message || "Upgrade verification failed.");
-          await fetchData();
+          fetchData();
         }
       } catch (err) {
         console.error("Upgrade return verify error:", err);
         toast.error(err.message || "Payment verification error");
-        await fetchData();
+        fetchData();
       } finally {
+        setLoading(false);
+      }
+    } else {
+      if (currentVendorId) {
+        fetchData();
+      } else {
         setLoading(false);
       }
     }

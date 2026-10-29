@@ -2582,7 +2582,7 @@ select.form-control {
 .sb-choice-title-row {
     display: flex;
     align-items: center;
-    justifyContent: space-between;
+    justify-content: space-between;
     gap: 6px;
     margin-bottom: 2px;
 }

@@ -22,7 +22,7 @@
 }
 
 /* When placed directly inside header-top without header-actions wrapper */
-.header-top > .btn-back-section {
+.header-top>.btn-back-section {
   margin-left: auto;
 }
 
@@ -55,4 +55,3 @@
     gap: 4px;
   }
 }
-

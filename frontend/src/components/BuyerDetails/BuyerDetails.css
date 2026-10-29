@@ -551,17 +551,17 @@
 }
 
 @media (max-width: 600px) {
-    .product-view-container > div {
+    .product-view-container>div {
         flex-direction: column !important;
     }
-    
+
     .product-image-preview {
         width: 100% !important;
         flex: none !important;
         margin-bottom: 1rem;
     }
-    
-    .product-image-preview img, 
+
+    .product-image-preview img,
     .product-image-placeholder {
         height: 150px !important;
         width: 100%;
@@ -569,6 +569,7 @@
 }
 
 @media (max-width: 540px) {
+
     .form-row-2col,
     .form-grid-2 {
         grid-template-columns: 1fr;
@@ -639,4 +640,3 @@
         font-size: 0.8rem;
     }
 }
-

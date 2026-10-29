@@ -3,7 +3,8 @@
 }
 
 .pending-product-card {
-    border: 1px solid #ff9800; /* Orange border for warning/pending */
+    border: 1px solid #ff9800;
+    /* Orange border for warning/pending */
     background-color: #fffaf0;
     transition: transform 0.2s, box-shadow 0.2s;
     border-radius: 8px;
@@ -37,7 +38,8 @@
 }
 
 .return-btn {
-    background-color: #ef4444; /* Red */
+    background-color: #ef4444;
+    /* Red */
     border-color: #ef4444;
 }
 
@@ -46,7 +48,8 @@
 }
 
 .back-today-btn {
-    background-color: #10b981; /* Green */
+    background-color: #10b981;
+    /* Green */
     border-color: #10b981;
 }
 
@@ -71,6 +74,7 @@
     align-items: center;
     gap: 5px;
 }
+
 /* Search Box Styles */
 .search-icon-container {
     position: relative;
@@ -201,12 +205,15 @@
     .pending-table td.custom-td:nth-of-type(1):before {
         content: "Product Details";
     }
+
     .pending-table td.custom-td:nth-of-type(2):before {
         content: "Seller & Date";
     }
+
     .pending-table td.custom-td:nth-of-type(3):before {
         content: "Variants (Qty & Comm)";
     }
+
     .pending-table td.custom-td:nth-of-type(4):before {
         content: "Actions";
     }

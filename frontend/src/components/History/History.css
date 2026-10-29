@@ -59,19 +59,28 @@
     transform: translateY(-2px);
 }
 
-.hs-stat-blue { border-left-color: #3b82f6; }
+.hs-stat-blue {
+    border-left-color: #3b82f6;
+}
+
 .hs-stat-icon-blue {
     background: rgba(59, 130, 246, 0.12) !important;
     color: #3b82f6 !important;
 }
 
-.hs-stat-green { border-left-color: #10b981; }
+.hs-stat-green {
+    border-left-color: #10b981;
+}
+
 .hs-stat-icon-green {
     background: rgba(16, 185, 129, 0.12) !important;
     color: #10b981 !important;
 }
 
-.hs-stat-amber { border-left-color: #f59e0b; }
+.hs-stat-amber {
+    border-left-color: #f59e0b;
+}
+
 .hs-stat-icon-amber {
     background: rgba(245, 158, 11, 0.12) !important;
     color: #f59e0b !important;
@@ -158,6 +167,7 @@
 
 /* MOBILE CARD VIEW */
 @media (max-width: 570px) {
+
     .hs-data-table,
     .hs-data-table thead,
     .hs-data-table tbody,
@@ -210,13 +220,33 @@
     }
 
     /* Fallback nth-of-type labels if data-label is absent */
-    .hs-data-table td.hs-td:nth-of-type(1)::before { content: "Date"; }
-    .hs-data-table td.hs-td:nth-of-type(2)::before { content: "Product"; }
-    .hs-data-table td.hs-td:nth-of-type(3)::before { content: "Seller"; }
-    .hs-data-table td.hs-td:nth-of-type(4)::before { content: "Buyer"; }
-    .hs-data-table td.hs-td:nth-of-type(5)::before { content: "Qty"; }
-    .hs-data-table td.hs-td:nth-of-type(6)::before { content: "Total"; }
-    .hs-data-table td.hs-td:nth-of-type(7)::before { content: "Comm."; }
+    .hs-data-table td.hs-td:nth-of-type(1)::before {
+        content: "Date";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(2)::before {
+        content: "Product";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(3)::before {
+        content: "Seller";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(4)::before {
+        content: "Buyer";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(5)::before {
+        content: "Qty";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(6)::before {
+        content: "Total";
+    }
+
+    .hs-data-table td.hs-td:nth-of-type(7)::before {
+        content: "Comm.";
+    }
 
     .hs-num-col {
         text-align: right !important;

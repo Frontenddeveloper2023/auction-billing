@@ -352,371 +352,372 @@ const PlanExtension = () => {
     <div className="saas-plan-ext-page" style={{ padding: "1.2rem 1.5rem" }}>
       {/* Page Header */}
       <div className="saas-page-header" style={{ marginBottom: "1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-        <div>
-          <h1 className="saas-page-title" style={{ fontSize: "1.6rem", fontWeight: "700", color: "#0f172a", margin: 0 }}>
-            Plan Extension
-          </h1>
-         
-        </div>
-        
+      <div>
+        <h1 className="saas-page-title" style={{ fontSize: "1.6rem", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+          Plan Extension
+        </h1>
+
       </div>
 
-      {/* Simplified Filter Bar */}
-      <div className="card" style={{ padding: "1rem 1.25rem", marginBottom: "1.25rem", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", alignItems: "center" }}>
-          
-          {/* Search by Name, Email, or Phone */}
-          <div style={{ position: "relative" }}>
-            <input
-              type="text"
-              className="form-control"
-              style={{ paddingLeft: "36px", height: "40px" }}
-              placeholder={isMobile ? "Search vendor..." : "Search by Name, Email, or Phone..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+    </div>
 
-          {/* Custom Expiring Days Filter */}
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <input
-              type="number"
-              min="0"
-              className="form-control"
-              style={{ height: "40px" }}
-              placeholder={isMobile ? "Expiring in days (e.g. 7)..." : "Filter expiring in days (e.g. 3, 7, 30)..."}
-              value={customDaysFilter}
-              onChange={(e) => setCustomDaysFilter(e.target.value)}
-            />
-            {customDaysFilter && (
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setCustomDaysFilter("")}
-                style={{ height: "40px", padding: "0 12px" }}
-                title="Clear Filter"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        </div>
+      {/* Simplified Filter Bar */ }
+  <div className="card" style={{ padding: "1rem 1.25rem", marginBottom: "1.25rem", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", alignItems: "center" }}>
+
+      {/* Search by Name, Email, or Phone */}
+      <div style={{ position: "relative" }}>
+        <input
+          type="text"
+          className="form-control"
+          style={{ paddingLeft: "36px", height: "40px" }}
+          placeholder={isMobile ? "Search vendor..." : "Search by Name, Email, or Phone..."}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {/* Vendors Table */}
-      <div className="card" style={{ padding: 0, overflow: "hidden", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-        {loading ? (
-          <div style={{ padding: "3rem" }}>
-            <LoadingSpinner message="Loading vendors..." />
-          </div>
-        ) : filteredVendors.length === 0 ? (
-          <div style={{ padding: "3.5rem 1rem", textAlign: "center", color: "#64748b" }}>
-            <AlertCircle size={38} style={{ margin: "0 auto 10px", color: "#94a3b8" }} />
-            <h3 style={{ fontSize: "1.1rem", color: "#1e293b" }}>No Vendors Found</h3>
-            <p style={{ fontSize: "0.85rem" }}>Try clearing search or entering different expiring days.</p>
-          </div>
-        ) : (
-          <>
-            <div
-              ref={tableContainerRef}
-              className={`table-responsive table-draggable-container ${isMouseDown ? "is-dragging" : ""}`}
-              onMouseDown={handleMouseDown}
-              onMouseLeave={handleMouseLeave}
-              onMouseUp={handleMouseUp}
-              onMouseMove={handleMouseMove}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={handleTouchEnd}
-              style={{
-                touchAction: "pan-x pan-y",
-              }}
-            >
-              <table className="custom-table plan-ext-table">
-                <thead>
-                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                    <th style={{ padding: "0.85rem 1.1rem" }}>Vendor Details</th>
-                    <th style={{ padding: "0.85rem 1.1rem" }}>Current Plan</th>
-                    <th style={{ padding: "0.85rem 1.1rem" }}>Current Expiry (IST)</th>
-                    <th style={{ padding: "0.85rem 1.1rem" }}>Days Remaining</th>
-                    <th style={{ padding: "0.85rem 1.1rem", textAlign: "right" }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedVendors.map((v) => {
-                    const daysLeft = getDaysRemaining(v);
-                    const isExpired = daysLeft !== null && daysLeft <= 0;
-                    const isExpiringSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 7;
-                    const planName = v.plan?.name || v.planName || "Active Plan";
-                    const expiryDisplay = formatIndianDateTime(v.planEndDate || v.activeSubscription?.endDate);
-
-                    return (
-                      <tr
-                        key={v._id}
-                        onClick={() => {
-                          if (dragInfo.current.hasMoved) return;
-                          handleOpenExtendModal(v);
-                        }}
-                        style={{
-                          borderBottom: "1px solid #f1f5f9",
-                          cursor: "pointer",
-                          transition: "background-color 0.15s ease",
-                        }}
-                        className="plan-ext-row"
-                        title="Click anywhere on row to extend plan"
-                      >
-                        {/* Vendor Details */}
-                        <td className="plan-ext-vendor-cell" style={{ padding: "0.85rem 1.1rem" }}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-                            <span className="plan-ext-vendor-name">
-                              {v.name}
-                            </span>
-                            <span className="plan-ext-vendor-info">
-                              <Mail size={12} style={{ flexShrink: 0, marginTop: "2px" }} />
-                              <span>{v.email}</span>
-                            </span>
-                            {v.phone && (
-                              <span className="plan-ext-vendor-info">
-                                <Phone size={12} style={{ flexShrink: 0, marginTop: "2px" }} />
-                                <span>{v.phone}</span>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Plan */}
-                        <td style={{ padding: "0.85rem 1.1rem" }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "0.25rem 0.65rem", borderRadius: "8px", background: "#f1f5f9", fontSize: "0.82rem", fontWeight: "600", color: "#334155" }}>
-                            <Zap size={13} style={{ color: "#f59e0b" }} />
-                            {planName}
-                          </span>
-                        </td>
-
-                        {/* Current Expiry */}
-                        <td style={{ padding: "0.85rem 1.1rem" }}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                            <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.86rem" }}>
-                              {expiryDisplay}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Days Remaining */}
-                        <td style={{ padding: "0.85rem 1.1rem" }}>
-                          {daysLeft === null ? (
-                            <span style={{ color: "#94a3b8", fontSize: "0.82rem" }}>N/A</span>
-                          ) : isExpired ? (
-                            <span style={{ color: "#dc2626", fontWeight: "700", fontSize: "0.84rem" }}>
-                              Expired ({Math.abs(daysLeft)}d ago)
-                            </span>
-                          ) : (
-                            <span style={{ color: isExpiringSoon ? "#d97706" : "#059669", fontWeight: "700", fontSize: "0.84rem" }}>
-                              {daysLeft} Day{daysLeft !== 1 ? "s" : ""} left
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Action Button */}
-                        <td style={{ padding: "0.85rem 1.1rem", textAlign: "right" }}>
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            style={{
-                              padding: "0.45rem 0.95rem",
-                              fontSize: "0.82rem",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              whiteSpace: "nowrap",
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenExtendModal(v);
-                            }}
-                          >
-                            <CalendarPlus size={15} />
-                            <span>Extend Plan</span>
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination Controls (5 per page) */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.85rem 1.25rem", borderTop: "1px solid #e2e8f0", background: "#f8fafc", flexWrap: "wrap", gap: "0.75rem" }}>
-              <div style={{ fontSize: "0.82rem", color: "#64748b" }}>
-                Showing <strong>{Math.min((currentPage - 1) * USERS_PER_PAGE + 1, filteredVendors.length)}</strong> to{" "}
-                <strong>{Math.min(currentPage * USERS_PER_PAGE, filteredVendors.length)}</strong> of{" "}
-                <strong>{filteredVendors.length}</strong> vendors
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", display: "inline-flex", alignItems: "center", gap: "4px" }}
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft size={15} />
-                  <span>Prev</span>
-                </button>
-
-                <span style={{ fontSize: "0.82rem", fontWeight: "600", color: "#334155", padding: "0 6px" }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", display: "inline-flex", alignItems: "center", gap: "4px" }}
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={currentPage >= totalPages}
-                >
-                  <span>Next</span>
-                  <ChevronRight size={15} />
-                </button>
-              </div>
-            </div>
-          </>
+      {/* Custom Expiring Days Filter */}
+      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <input
+          type="number"
+          min="0"
+          className="form-control"
+          style={{ height: "40px" }}
+          placeholder={isMobile ? "Expiring in days (e.g. 7)..." : "Filter expiring in days (e.g. 3, 7, 30)..."}
+          value={customDaysFilter}
+          onChange={(e) => setCustomDaysFilter(e.target.value)}
+        />
+        {customDaysFilter && (
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => setCustomDaysFilter("")}
+            style={{ height: "40px", padding: "0 12px" }}
+            title="Clear Filter"
+          >
+            <X size={14} />
+          </button>
         )}
       </div>
+    </div>
+  </div>
 
-      {/* ── User-Friendly Extend Plan Modal ──────────────────────── */}
-      {isModalOpen && selectedVendor && (
-        <div className="custom-modal-backdrop" onClick={() => !submitting && setIsModalOpen(false)}>
-          <div
-            className="custom-modal-content"
-            style={{ maxWidth: "500px", width: "95%", borderRadius: "12px", padding: "1.4rem" }}
-            onClick={(e) => e.stopPropagation()}
+  {/* Vendors Table */ }
+  <div className="card" style={{ padding: 0, overflow: "hidden", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+    {loading ? (
+      <div style={{ padding: "3rem" }}>
+        <LoadingSpinner message="Loading vendors..." />
+      </div>
+    ) : filteredVendors.length === 0 ? (
+      <div style={{ padding: "3.5rem 1rem", textAlign: "center", color: "#64748b" }}>
+        <AlertCircle size={38} style={{ margin: "0 auto 10px", color: "#94a3b8" }} />
+        <h3 style={{ fontSize: "1.1rem", color: "#1e293b" }}>No Vendors Found</h3>
+        <p style={{ fontSize: "0.85rem" }}>Try clearing search or entering different expiring days.</p>
+      </div>
+    ) : (
+      <>
+        <div
+          ref={tableContainerRef}
+          className={`table-responsive table-draggable-container ${isMouseDown ? "is-dragging" : ""}`}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          style={{
+            touchAction: "pan-x pan-y",
+          }}
+        >
+          <table className="custom-table plan-ext-table">
+            <thead>
+              <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                <th style={{ padding: "0.85rem 1.1rem" }}>Vendor Details</th>
+                <th style={{ padding: "0.85rem 1.1rem" }}>Current Plan</th>
+                <th style={{ padding: "0.85rem 1.1rem" }}>Current Expiry (IST)</th>
+                <th style={{ padding: "0.85rem 1.1rem" }}>Days Remaining</th>
+                <th style={{ padding: "0.85rem 1.1rem", textAlign: "right" }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedVendors.map((v) => {
+                const daysLeft = getDaysRemaining(v);
+                const isExpired = daysLeft !== null && daysLeft <= 0;
+                const isExpiringSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 7;
+                const planName = v.plan?.name || v.planName || "Active Plan";
+                const expiryDisplay = formatIndianDateTime(v.planEndDate || v.activeSubscription?.endDate);
+
+                return (
+                  <tr
+                    key={v._id}
+                    onClick={() => {
+                      if (dragInfo.current.hasMoved) return;
+                      handleOpenExtendModal(v);
+                    }}
+                    style={{
+                      borderBottom: "1px solid #f1f5f9",
+                      cursor: "pointer",
+                      transition: "background-color 0.15s ease",
+                    }}
+                    className="plan-ext-row"
+                    title="Click anywhere on row to extend plan"
+                  >
+                    {/* Vendor Details */}
+                    <td className="plan-ext-vendor-cell" style={{ padding: "0.85rem 1.1rem" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                        <span className="plan-ext-vendor-name">
+                          {v.name}
+                        </span>
+                        <span className="plan-ext-vendor-info">
+                          <Mail size={12} style={{ flexShrink: 0, marginTop: "2px" }} />
+                          <span>{v.email}</span>
+                        </span>
+                        {v.phone && (
+                          <span className="plan-ext-vendor-info">
+                            <Phone size={12} style={{ flexShrink: 0, marginTop: "2px" }} />
+                            <span>{v.phone}</span>
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Plan */}
+                    <td style={{ padding: "0.85rem 1.1rem" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "0.25rem 0.65rem", borderRadius: "8px", background: "#f1f5f9", fontSize: "0.82rem", fontWeight: "600", color: "#334155" }}>
+                        <Zap size={13} style={{ color: "#f59e0b" }} />
+                        {planName}
+                      </span>
+                    </td>
+
+                    {/* Current Expiry */}
+                    <td style={{ padding: "0.85rem 1.1rem" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                        <span style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.86rem" }}>
+                          {expiryDisplay}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Days Remaining */}
+                    <td style={{ padding: "0.85rem 1.1rem" }}>
+                      {daysLeft === null ? (
+                        <span style={{ color: "#94a3b8", fontSize: "0.82rem" }}>N/A</span>
+                      ) : isExpired ? (
+                        <span style={{ color: "#dc2626", fontWeight: "700", fontSize: "0.84rem" }}>
+                          Expired ({Math.abs(daysLeft)}d ago)
+                        </span>
+                      ) : (
+                        <span style={{ color: isExpiringSoon ? "#d97706" : "#059669", fontWeight: "700", fontSize: "0.84rem" }}>
+                          {daysLeft} Day{daysLeft !== 1 ? "s" : ""} left
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Action Button */}
+                    <td style={{ padding: "0.85rem 1.1rem", textAlign: "right" }}>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{
+                          padding: "0.45rem 0.95rem",
+                          fontSize: "0.82rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          whiteSpace: "nowrap",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenExtendModal(v);
+                        }}
+                      >
+                        <CalendarPlus size={15} />
+                        <span>Extend Plan</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls (5 per page) */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.85rem 1.25rem", borderTop: "1px solid #e2e8f0", background: "#f8fafc", flexWrap: "wrap", gap: "0.75rem" }}>
+        <div style={{ fontSize: "0.82rem", color: "#64748b" }}>
+          Showing <strong>{Math.min((currentPage - 1) * USERS_PER_PAGE + 1, filteredVendors.length)}</strong> to{" "}
+          <strong>{Math.min(currentPage * USERS_PER_PAGE, filteredVendors.length)}</strong> of{" "}
+          <strong>{filteredVendors.length}</strong> vendors
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", display: "inline-flex", alignItems: "center", gap: "4px" }}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
           >
-            {/* Modal Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.75rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <div style={{ background: "#ecfdf5", padding: "7px", borderRadius: "8px", color: "#059669" }}>
-                  <CalendarPlus size={20} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#0f172a" }}>Extend Plan</h3>
-                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#64748b" }}>
-                    Vendor: <strong>{selectedVendor.name}</strong>
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline"
-                style={{ padding: "4px", borderRadius: "50%" }}
-                onClick={() => !submitting && setIsModalOpen(false)}
-              >
-                <X size={17} />
-              </button>
-            </div>
+            <ChevronLeft size={15} />
+            <span>Prev</span>
+          </button>
 
-            <form onSubmit={handleSubmitExtension}>
-              {/* Current Expiry Info */}
-              <div style={{ background: "#f8fafc", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <span style={{ fontSize: "0.76rem", color: "#64748b", display: "block" }}>Current Expiry Date &amp; Time</span>
-                  <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#0f172a" }}>
-                    {formatIndianDateTime(selectedVendor.planEndDate || selectedVendor.activeSubscription?.endDate)}
-                  </span>
-                </div>
-                <span style={{ padding: "0.2rem 0.55rem", borderRadius: "6px", background: "#f1f5f9", fontSize: "0.76rem", fontWeight: "600", color: "#475569" }}>
-                  {selectedVendor.plan?.name || "Active Plan"}
-                </span>
-              </div>
+          <span style={{ fontSize: "0.82rem", fontWeight: "600", color: "#334155", padding: "0 6px" }}>
+            Page {currentPage} of {totalPages}
+          </span>
 
-              {/* Field 1: Enter Manual Days (Synced with Calendar) */}
-              <div className="form-group" style={{ marginBottom: "1rem" }}>
-                <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
-                  Enter Days to Extend
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    type="number"
-                    min="1"
-                    className="form-control"
-                    placeholder="e.g. 7, 15, 30"
-                    value={extendDays}
-                    onChange={(e) => handleDaysChange(e.target.value)}
-                    required
-                    style={{ height: "42px", fontSize: "0.95rem", fontWeight: "600" }}
-                  />
-                  <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "0.82rem", color: "#64748b", pointerEvents: "none" }}>
-                    Days
-                  </span>
-                </div>
-              </div>
+          <button
+            type="button"
+            className="btn btn-outline"
+            style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", display: "inline-flex", alignItems: "center", gap: "4px" }}
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage >= totalPages}
+          >
+            <span>Next</span>
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      </div>
+  </>
+        )}
+      </div >
 
-              {/* Field 2: Or Choose Calendar Expiry Date (Synced with Days) */}
-              <div className="form-group" style={{ marginBottom: "1rem" }}>
-                <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
-                  Or Choose Expiry Date (Calendar)
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={expiryDate}
-                    onChange={(e) => handleCalendarDateChange(e.target.value)}
-                    required
-                    style={{ height: "42px", fontSize: "0.92rem" }}
-                  />
-                </div>
-              </div>
+  {/* ── User-Friendly Extend Plan Modal ──────────────────────── */ }
+{
+  isModalOpen && selectedVendor && (
+    <div className="custom-modal-backdrop" onClick={() => !submitting && setIsModalOpen(false)}>
+      <div
+        className="custom-modal-content"
+        style={{ maxWidth: "500px", width: "95%", borderRadius: "12px", padding: "1.4rem" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ background: "#ecfdf5", padding: "7px", borderRadius: "8px", color: "#059669" }}>
+            <CalendarPlus size={20} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#0f172a" }}>Extend Plan</h3>
+            <p style={{ margin: 0, fontSize: "0.78rem", color: "#64748b" }}>
+              Vendor: <strong>{selectedVendor.name}</strong>
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn btn-outline"
+          style={{ padding: "4px", borderRadius: "50%" }}
+          onClick={() => !submitting && setIsModalOpen(false)}
+        >
+          <X size={17} />
+        </button>
+      </div>
 
-              {/* Field 3: Indian Time Selection (12-Hour AM/PM) */}
-              <div className="form-group" style={{ marginBottom: "1.2rem" }}>
-                <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
-                  Expiry Time 
-                </label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-                  {/* Hour */}
-                  <select
-                    className="form-control"
-                    value={timeHour}
-                    onChange={(e) => setTimeHour(e.target.value)}
-                    style={{ height: "40px" }}
-                  >
-                    {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((hr) => (
-                      <option key={hr} value={hr}>
-                        {hr} hr
-                      </option>
-                    ))}
-                  </select>
+      <form onSubmit={handleSubmitExtension}>
+        {/* Current Expiry Info */}
+        <div style={{ background: "#f8fafc", padding: "0.75rem 1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <span style={{ fontSize: "0.76rem", color: "#64748b", display: "block" }}>Current Expiry Date &amp; Time</span>
+          <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#0f172a" }}>
+            {formatIndianDateTime(selectedVendor.planEndDate || selectedVendor.activeSubscription?.endDate)}
+          </span>
+        </div>
+        <span style={{ padding: "0.2rem 0.55rem", borderRadius: "6px", background: "#f1f5f9", fontSize: "0.76rem", fontWeight: "600", color: "#475569" }}>
+          {selectedVendor.plan?.name || "Active Plan"}
+        </span>
+    </div>
 
-                  {/* Minute */}
-                  <select
-                    className="form-control"
-                    value={timeMinute}
-                    onChange={(e) => setTimeMinute(e.target.value)}
-                    style={{ height: "40px" }}
-                  >
-                    {["00", "15", "30", "45", "59"].map((min) => (
-                      <option key={min} value={min}>
-                        {min} min
-                      </option>
-                    ))}
-                  </select>
+              {/* Field 1: Enter Manual Days (Synced with Calendar) */ }
+  <div className="form-group" style={{ marginBottom: "1rem" }}>
+    <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
+      Enter Days to Extend
+    </label>
+    <div style={{ position: "relative" }}>
+      <input
+        type="number"
+        min="1"
+        className="form-control"
+        placeholder="e.g. 7, 15, 30"
+        value={extendDays}
+        onChange={(e) => handleDaysChange(e.target.value)}
+        required
+        style={{ height: "42px", fontSize: "0.95rem", fontWeight: "600" }}
+      />
+      <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "0.82rem", color: "#64748b", pointerEvents: "none" }}>
+        Days
+      </span>
+    </div>
+  </div>
 
-                  {/* AM/PM */}
-                  <select
-                    className="form-control"
-                    value={timePeriod}
-                    onChange={(e) => setTimePeriod(e.target.value)}
-                    style={{ height: "40px", fontWeight: "700", color: timePeriod === "PM" ? "#b45309" : "#059669" }}
-                  >
-                    <option value="AM">AM</option>
-                    <option value="PM">PM</option>
-                  </select>
-                </div>
-              </div>
+  {/* Field 2: Or Choose Calendar Expiry Date (Synced with Days) */ }
+  <div className="form-group" style={{ marginBottom: "1rem" }}>
+    <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
+      Or Choose Expiry Date (Calendar)
+    </label>
+    <div style={{ position: "relative" }}>
+      <input
+        type="date"
+        className="form-control"
+        value={expiryDate}
+        onChange={(e) => handleCalendarDateChange(e.target.value)}
+        required
+        style={{ height: "42px", fontSize: "0.92rem" }}
+      />
+    </div>
+  </div>
 
-              {/* Short Note: Dynamic calculation summary */}
+  {/* Field 3: Indian Time Selection (12-Hour AM/PM) */ }
+  <div className="form-group" style={{ marginBottom: "1.2rem" }}>
+    <label style={{ fontSize: "0.82rem", fontWeight: "600", color: "#1e293b", marginBottom: "5px", display: "block" }}>
+      Expiry Time
+    </label>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+      {/* Hour */}
+      <select
+        className="form-control"
+        value={timeHour}
+        onChange={(e) => setTimeHour(e.target.value)}
+        style={{ height: "40px" }}
+      >
+        {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((hr) => (
+          <option key={hr} value={hr}>
+            {hr} hr
+          </option>
+        ))}
+      </select>
+
+      {/* Minute */}
+      <select
+        className="form-control"
+        value={timeMinute}
+        onChange={(e) => setTimeMinute(e.target.value)}
+        style={{ height: "40px" }}
+      >
+        {["00", "15", "30", "45", "59"].map((min) => (
+          <option key={min} value={min}>
+            {min} min
+          </option>
+        ))}
+      </select>
+
+      {/* AM/PM */}
+      <select
+        className="form-control"
+        value={timePeriod}
+        onChange={(e) => setTimePeriod(e.target.value)}
+        style={{ height: "40px", fontWeight: "700", color: timePeriod === "PM" ? "#b45309" : "#059669" }}
+      >
+        <option value="AM">AM</option>
+        <option value="PM">PM</option>
+      </select>
+    </div>
+  </div>
+
+  {/* Short Note: Dynamic calculation summary */ }
               <div
                 style={{
                   background: "#f0fdf4",
@@ -782,10 +783,10 @@ const PlanExtension = () => {
                 >
                   A confirmation email with this date &amp; time will be automatically sent to <strong>{selectedVendor.email}</strong>.
                 </p>
-              </div>
+              </div >
 
-              {/* Buttons */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+    {/* Buttons */ }
+    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -803,12 +804,12 @@ const PlanExtension = () => {
                 >
                   {submitting ? "Extending..." : "Confirm & Extend"}
                 </button>
-              </div>
-            </form>
-          </div>
-        </div>
+              </div >
+            </form >
+          </div >
+        </div >
       )}
-    </div>
+    </div >
   );
 };
 

@@ -284,12 +284,15 @@
         width: 265px;
         max-width: 85vw;
     }
+
     .sidebar-header {
         padding: 0.9rem 1rem;
     }
+
     .logo-text h2 {
         font-size: 0.95rem;
     }
+
     .nav-item {
         padding: 0.5rem 0.65rem;
         font-size: 0.825rem;
@@ -302,30 +305,37 @@
         width: 245px;
         max-width: 84vw;
     }
+
     .sidebar-header {
         padding: 0.75rem 0.85rem;
     }
+
     .logo-icon {
         width: 30px;
         height: 30px;
     }
+
     .logo-text h2 {
         font-size: 0.88rem;
     }
+
     .nav-item {
         padding: 0.45rem 0.55rem;
         font-size: 0.78rem;
         gap: 7px;
     }
+
     .nav-icon {
         width: 24px;
         height: 24px;
     }
+
     .nav-icon svg {
         width: 16px;
         height: 16px;
     }
 }
+
 /* Main Content Area */
 .main-content {
     flex: 1 1 0;
@@ -547,10 +557,10 @@ a .stat-card:hover {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .card-list > .table-responsive,
-    .card-list > .custom-table-wrapper,
-    .card-list > .table-container-full,
-    .card-list > table {
+    .card-list>.table-responsive,
+    .card-list>.custom-table-wrapper,
+    .card-list>.table-container-full,
+    .card-list>table {
         grid-column: 1 / -1 !important;
         width: 100% !important;
     }
@@ -724,8 +734,13 @@ a .stat-card:hover {
 }
 
 @keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal {
@@ -749,6 +764,7 @@ a .stat-card:hover {
         transform: scale(0.97) translateY(8px);
         opacity: 0;
     }
+
     to {
         transform: scale(1) translateY(0);
         opacity: 1;
@@ -1125,7 +1141,8 @@ a .stat-card:hover {
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 8px;
-    border: 2px solid var(--bg-secondary); /* approximates #f3f4f6 */
+    border: 2px solid var(--bg-secondary);
+    /* approximates #f3f4f6 */
 }
 
 .profile-dropdown-name {
@@ -1140,6 +1157,7 @@ a .stat-card:hover {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 @media (max-width: 350px) {
     .mobile-header h2 {
         font-size: 1rem;

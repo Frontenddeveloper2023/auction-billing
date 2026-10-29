@@ -93,31 +93,31 @@ function Branches() {
     setShowModal(true);
   };
 
- const toggleStatus = async (branch) => {
-  try {
-    const branchId = branch._id || branch.id;
-    const newStatus = branch.status === "Active" ? "Inactive" : "Active";
+  const toggleStatus = async (branch) => {
+    try {
+      const branchId = branch._id || branch.id;
+      const newStatus = branch.status === "Active" ? "Inactive" : "Active";
 
-    const res = await updateVendor(branchId, {
-      status: newStatus,
-    });
+      const res = await updateVendor(branchId, {
+        status: newStatus,
+      });
 
-    if (res.status) {
-      setBranches((prev) =>
-        prev.map((b) =>
-          (b._id || b.id) === branchId
-            ? { ...b, status: newStatus }
-            : b
-        )
-      );
+      if (res.status) {
+        setBranches((prev) =>
+          prev.map((b) =>
+            (b._id || b.id) === branchId
+              ? { ...b, status: newStatus }
+              : b
+          )
+        );
 
-      toast.success(`Branch ${newStatus} successfully`);
+        toast.success(`Branch ${newStatus} successfully`);
+      }
+    } catch (error) {
+      console.error("Error toggling status:", error);
+      toast.error(error.message || "Failed to update branch status");
     }
-  } catch (error) {
-    console.error("Error toggling status:", error);
-    toast.error(error.message || "Failed to update branch status");
-  }
-};
+  };
 
   const fetchStates = async () => {
     setLoadingStates(true);
@@ -298,123 +298,125 @@ function Branches() {
                         </button>
                       </div>
                     </td>
-                  </tr>
-                ))}
-                {!branches.length && (
-                  <tr>
-                    <td colSpan="6" className="text-center p-4">
-                      No branches found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            </tr>
+          ))}
+          {!branches.length && (
+            <tr>
+              <td colSpan="6" className="text-center p-4">
+                No branches found.
+              </td>
+            </tr>
           )}
-        </div>
-
-        {showModal && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <div className="modal-header">
-                <h3 className="modal-title">
-                  {editingBranch ? "Edit Branch" : "Add New Branch"}
-                </h3>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <form onSubmit={handleSubmit}>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label className="form-label">Name</label>
-                    <input
-                      type="text"
-                      className="form-control "
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                 <div className="form-row">
-  <div className="form-group form-col">
-    <label className="form-label">State</label>
-    <SearchableSelect
-      name="state"
-      value={formData.state}
-      onChange={(e) => {
-        const val = e.target.value;
-        setFormData((prev) => ({ ...prev, state: val, city: "" }));
-        fetchCities(val);
-      }}
-      placeholder={loadingStates ? "Loading..." : "Select state"}
-      options={states.map((s) => ({ label: s.name, value: s.name }))}
-      required
-    />
-  </div>
-  <div className="form-group form-col">
-    <label className="form-label">City</label>
-    <SearchableSelect
-      name="city"
-      value={formData.city}
-      onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
-      disabled={!formData.state || loadingCities}
-      placeholder={loadingCities ? "Loading..." : "Select city"}
-      options={cities.map((c) => ({ label: c.name, value: c.name }))}
-      required
-    />
-  </div>
-</div>
-                  <div className="form-group">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="form-control"
-                      value={formData.status}
-                      onChange={(e) =>
-                        setFormData({ ...formData, status: e.target.value })
-                      }
-                      required
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}
-                  >
-                    {loading ? "Saving..." : editingBranch ? "Update" : "Add"}{" "}
-                    Branch
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        <ConfirmationModal
-          isOpen={confirmInfo.isOpen}
-          onClose={handleConfirmClose}
-          title="Delete Branch"
-          message="Are you sure you want to delete this branch?"
-          onConfirm={handleConfirm}
-        />
-      </div>
+        </tbody>
+      </table>
+          )}
     </div>
+
+        {
+    showModal && (
+      <div className="modal-overlay">
+        <div className="modal">
+          <div className="modal-header">
+            <h3 className="modal-title">
+              {editingBranch ? "Edit Branch" : "Add New Branch"}
+            </h3>
+            <button
+              className="modal-close"
+              onClick={() => setShowModal(false)}
+            >
+              ×
+            </button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input
+                  type="text"
+                  className="form-control "
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group form-col">
+                  <label className="form-label">State</label>
+                  <SearchableSelect
+                    name="state"
+                    value={formData.state}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData((prev) => ({ ...prev, state: val, city: "" }));
+                      fetchCities(val);
+                    }}
+                    placeholder={loadingStates ? "Loading..." : "Select state"}
+                    options={states.map((s) => ({ label: s.name, value: s.name }))}
+                    required
+                  />
+                </div>
+                <div className="form-group form-col">
+                  <label className="form-label">City</label>
+                  <SearchableSelect
+                    name="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
+                    disabled={!formData.state || loadingCities}
+                    placeholder={loadingCities ? "Loading..." : "Select city"}
+                    options={cities.map((c) => ({ label: c.name, value: c.name }))}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-control"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  required
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : editingBranch ? "Update" : "Add"}{" "}
+                Branch
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  <ConfirmationModal
+    isOpen={confirmInfo.isOpen}
+    onClose={handleConfirmClose}
+    title="Delete Branch"
+    message="Are you sure you want to delete this branch?"
+    onConfirm={handleConfirm}
+  />
+      </div >
+    </div >
   );
 }
 

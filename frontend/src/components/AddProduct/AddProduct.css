@@ -1,4 +1,3 @@
-
 /* ============================================
    ADD PRODUCT — PROFESSIONAL RESPONSIVE UI
 ============================================ */
@@ -1045,6 +1044,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .product-list-container *,
   .product-list-container *::before,
   .product-list-container *::after,

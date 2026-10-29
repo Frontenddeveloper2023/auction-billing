@@ -152,15 +152,15 @@ const ConfirmationModal = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "8px",
+          gap: "8px",
             }}
           >
-            {isLoading && <Loader size={16} className="saas-spinner" />}
-            {isLoading ? "Processing..." : confirmText}
-          </button>
-        </div>
+          {isLoading && <Loader size={16} className="saas-spinner" />}
+          {isLoading ? "Processing..." : confirmText}
+        </button>
       </div>
     </div>
+    </div >
   );
 };
 

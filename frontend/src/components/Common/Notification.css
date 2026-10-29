@@ -1,60 +1,64 @@
 .notification-icon-container {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
 }
 
 .notification-icon-container .icon-btn {
-  height: 32px;
-  width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.2); /* match header glassy style */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  flex-shrink: 0; /* prevent squishing */
-  transition: all 0.2s;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    /* match header glassy style */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    flex-shrink: 0;
+    /* prevent squishing */
+    transition: all 0.2s;
 }
 
 .notification-icon-container .icon-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .notification-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background-color: #ef4444;
-  color: white;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 99px;
-  padding: 0 4px;
-  font-size: 10px;
-  font-weight: bold;
-  border: 2px solid #ef4444; /* match bg for cleaner look */
-}
-.notification-count1{
     position: absolute;
-  top: 18px;
-  right: 17px;
-  background-color: #ef4444;
-  color: white;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 99px;
-  padding: 0 4px;
-  font-size: 10px;
-  font-weight: bold;
-  border: 2px solid #ef4444;
+    top: -6px;
+    right: -6px;
+    background-color: #ef4444;
+    color: white;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 99px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid #ef4444;
+    /* match bg for cleaner look */
+}
+
+.notification-count1 {
+    position: absolute;
+    top: 18px;
+    right: 17px;
+    background-color: #ef4444;
+    color: white;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 99px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid #ef4444;
 
 }
 
@@ -165,6 +169,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

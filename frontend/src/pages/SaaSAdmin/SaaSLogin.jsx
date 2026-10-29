@@ -224,8 +224,8 @@ const SaaSLogin = () => {
                         </div>
                     </form>
                 )}
-            </div>
         </div>
+        </div >
     );
 };
 

@@ -81,6 +81,7 @@
     background: var(--bg-secondary) !important;
     transition: background 0.2s, color 0.2s;
 }
+
 .cr-edit-btn:hover {
     background: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
@@ -100,21 +101,30 @@
 }
 
 /* Amber – Total Commission */
-.cr-stat-amber { border-left-color: var(--primary-amber); }
+.cr-stat-amber {
+    border-left-color: var(--primary-amber);
+}
+
 .cr-stat-icon-amber {
     background: rgba(245, 158, 11, 0.12) !important;
     color: var(--primary-amber) !important;
 }
 
 /* Blue – Transactions */
-.cr-stat-blue { border-left-color: #3b82f6; }
+.cr-stat-blue {
+    border-left-color: #3b82f6;
+}
+
 .cr-stat-icon-blue {
     background: rgba(59, 130, 246, 0.12) !important;
     color: #3b82f6 !important;
 }
 
 /* Green – Average */
-.cr-stat-green { border-left-color: #10b981; }
+.cr-stat-green {
+    border-left-color: #10b981;
+}
+
 .cr-stat-icon-green {
     background: rgba(16, 185, 129, 0.12) !important;
     color: #10b981 !important;
@@ -206,8 +216,13 @@
     transition: border-color 0.2s;
 }
 
-.cr-select       { min-width: 118px; }
-.cr-date-input   { min-width: 128px; }
+.cr-select {
+    min-width: 118px;
+}
+
+.cr-date-input {
+    min-width: 128px;
+}
 
 .cr-select:focus,
 .cr-date-input:focus {
@@ -249,8 +264,13 @@
     overflow: hidden;
 }
 
-.cr-num-col    { text-align: right  !important; }
-.cr-center-col { text-align: center !important; }
+.cr-num-col {
+    text-align: right !important;
+}
+
+.cr-center-col {
+    text-align: center !important;
+}
 
 /* Highlighted "Earned" column header */
 .cr-highlight-col {
@@ -314,7 +334,7 @@
    7. TFOOT SUMMARY ROW
 ───────────────────────────────────────────────────────────────── */
 .cr-tfoot-row {
-    background: linear-gradient(to right, var(--bg-tertiary), rgba(245,158,11,0.06));
+    background: linear-gradient(to right, var(--bg-tertiary), rgba(245, 158, 11, 0.06));
     border-top: 2px solid var(--border-color);
 }
 
@@ -351,7 +371,9 @@
         gap: 0.35rem;
     }
 
-    .cr-global-label { display: none; }
+    .cr-global-label {
+        display: none;
+    }
 
     /* Filters stack vertically */
     .cr-filter-row {
@@ -359,7 +381,9 @@
         align-items: stretch;
     }
 
-    .cr-search-wrap { width: 100%; }
+    .cr-search-wrap {
+        width: 100%;
+    }
 
     .cr-controls {
         width: 100%;
@@ -367,7 +391,9 @@
     }
 
     .cr-select,
-    .cr-date-input { flex: 1; }
+    .cr-date-input {
+        flex: 1;
+    }
 
     /* Table → card-row layout */
     .commission-table,
@@ -422,23 +448,43 @@
         max-width: 48%;
     }
 
-    .commission-table td.custom-td:nth-of-type(1)::before { content: "Date"; }
-    .commission-table td.custom-td:nth-of-type(2)::before { content: "Product"; }
-    .commission-table td.custom-td:nth-of-type(3)::before { content: "Seller"; }
-    .commission-table td.custom-td:nth-of-type(4)::before { content: "Sale Amount"; }
-    .commission-table td.custom-td:nth-of-type(5)::before { content: "Comm %"; }
-    .commission-table td.custom-td:nth-of-type(6)::before { content: "Earned"; }
+    .commission-table td.custom-td:nth-of-type(1)::before {
+        content: "Date";
+    }
+
+    .commission-table td.custom-td:nth-of-type(2)::before {
+        content: "Product";
+    }
+
+    .commission-table td.custom-td:nth-of-type(3)::before {
+        content: "Seller";
+    }
+
+    .commission-table td.custom-td:nth-of-type(4)::before {
+        content: "Sale Amount";
+    }
+
+    .commission-table td.custom-td:nth-of-type(5)::before {
+        content: "Comm %";
+    }
+
+    .commission-table td.custom-td:nth-of-type(6)::before {
+        content: "Earned";
+    }
 
     /* Fix center col alignment on mobile so the badge floats properly right */
     .commission-table td.custom-td.cr-center-col {
         text-align: right !important;
     }
+
     .commission-table td.custom-td.cr-num-col {
         text-align: right !important;
     }
 
     /* Highlight col on mobile – no bg */
-    .cr-highlight-col { background: transparent !important; }
+    .cr-highlight-col {
+        background: transparent !important;
+    }
 
     /* tfoot on mobile */
     .cr-tfoot-row {
@@ -446,7 +492,9 @@
         margin-top: 4px;
     }
 
-    .cr-tfoot-label  { display: none; }
+    .cr-tfoot-label {
+        display: none;
+    }
 
     .cr-tfoot-sales,
     .cr-tfoot-earned {
@@ -455,10 +503,11 @@
         position: relative;
     }
 
-    .cr-tfoot-sales::before  {
+    .cr-tfoot-sales::before {
         content: "Total Sales";
         position: absolute;
-        top: 50%; left: 12px;
+        top: 50%;
+        left: 12px;
         transform: translateY(-50%);
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -470,7 +519,8 @@
     .cr-tfoot-earned::before {
         content: "Total Earned";
         position: absolute;
-        top: 50%; left: 12px;
+        top: 50%;
+        left: 12px;
         transform: translateY(-50%);
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -481,12 +531,14 @@
 }
 
 @media (max-width: 380px) {
-    .cr-global-input { width: 52px !important; }
-    
+    .cr-global-input {
+        width: 52px !important;
+    }
+
     .commission-table td.custom-td {
         padding-left: 35% !important;
     }
-    
+
     .commission-table td.custom-td::before {
         width: 30% !important;
         font-size: 0.7rem !important;
