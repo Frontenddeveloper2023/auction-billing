@@ -60,53 +60,57 @@ const BottomNavbar = () => {
   ];
 
   return (
-    <nav className="bottom-navbar" role="navigation" aria-label="Bottom Navigation">
-      <div className="bottom-navbar-content">
-        {navItems.map((item) => {
-          const Icon = item.icon;
+    <>
+      <nav className="bottom-navbar" role="navigation" aria-label="Bottom Navigation">
+        <div className="bottom-navbar-content">
+          {navItems.map((item) => {
+            const Icon = item.icon;
 
-          if (item.isCenter) {
+            if (item.isCenter) {
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`bottom-nav-item bottom-nav-center-wrap ${
+                    item.isActive ? "active" : ""
+                  }`}
+                  onClick={() => navigate(item.path)}
+                  title={item.label}
+                >
+                  <div
+                    className={`bottom-nav-center-btn ${
+                      item.isActive ? "active" : ""
+                    }`}
+                  >
+                    <Icon className="bottom-nav-center-icon" strokeWidth={2.4} />
+                  </div>
+                  <span className="bottom-nav-label center-label">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            }
+
             return (
               <button
                 key={item.id}
                 type="button"
-                className={`bottom-nav-item bottom-nav-center-wrap ${
-                  item.isActive ? "active" : ""
-                }`}
+                className={`bottom-nav-item ${item.isActive ? "active" : ""}`}
                 onClick={() => navigate(item.path)}
                 title={item.label}
               >
-                <div
-                  className={`bottom-nav-center-btn ${
-                    item.isActive ? "active" : ""
-                  }`}
-                >
-                  <Icon size={25} strokeWidth={2.4} />
+                <div className="bottom-nav-icon-wrap">
+                  <Icon className="bottom-nav-icon" strokeWidth={item.isActive ? 2.3 : 1.8} />
                 </div>
-                <span className="bottom-nav-label center-label">
-                  {item.label}
-                </span>
+                <span className="bottom-nav-label">{item.label}</span>
               </button>
             );
-          }
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={`bottom-nav-item ${item.isActive ? "active" : ""}`}
-              onClick={() => navigate(item.path)}
-              title={item.label}
-            >
-              <div className="bottom-nav-icon-wrap">
-                <Icon size={21} strokeWidth={item.isActive ? 2.3 : 1.8} />
-              </div>
-              <span className="bottom-nav-label">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </nav>
+          })}
+        </div>
+      </nav>
+      {/* Spacer to preserve document layout and prevent bottom content from being covered */}
+      <div className="bottom-navbar-spacer" aria-hidden="true" />
+    </>
   );
 };
 

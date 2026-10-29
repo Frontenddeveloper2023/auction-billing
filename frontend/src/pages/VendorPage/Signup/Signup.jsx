@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  Eye,
-  EyeOff,
   Check,
   ArrowRight,
   ArrowLeft,
@@ -12,14 +10,18 @@ import {
   Phone,
   Mail,
   User,
-  Lock,
 } from "lucide-react";
 import { getSubscriptions } from "../../../api/adminApi";
-import { mainVendorSignup } from "../../../api/mainVendorApi";
+import {
+  mainVendorSignup,
+  createVendorPaymentOrder,
+  verifyAndRegisterVendor,
+} from "../../../api/mainVendorApi";
 import { toast } from "react-toastify";
 import SearchableSelect from "../../../components/Common/SearchableSelect.jsx";
 import "./Signup.css";
 import ConfirmationModal from "../../../components/Common/ConfirmationModal";
+import { loadCashfreeSdk } from "../../../utils/cashfreeSdk";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -47,21 +49,92 @@ const Signup = () => {
     name: "",
     email: "",
     phone: "",
-    password: "",
-    confirmPassword: "",
     address: "",
     city: "",
     state: "",
   });
 
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(() => {
+    return Boolean(new URLSearchParams(window.location.search).get("order_id"));
+  });
 
   useEffect(() => {
     fetchPlans();
     fetchStates();
+    checkReturnPayment();
   }, []);
+
+  // Handle return from full-screen Cashfree redirect
+  const checkReturnPayment = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id");
+    const savedDataStr = sessionStorage.getItem("pending_vendor_signup");
+
+    if (orderId) {
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      );
+    }
+
+    if (orderId && savedDataStr) {
+      sessionStorage.removeItem("pending_vendor_signup");
+      try {
+        const savedData = JSON.parse(savedDataStr);
+        const verifyRes = await verifyAndRegisterVendor({
+          ...savedData,
+          orderId,
+        });
+
+        setIsVerifyingPayment(false);
+
+        if (verifyRes.status) {
+          toast.success("Payment Received Successfully!", { autoClose: 4000 });
+          setConfirmModal({
+            isOpen: true,
+            title: "Payment Received Successfully!",
+            message:
+              "Thank you! Your payment has been confirmed. Your account details have been sent to our administrator for review. Once approved, you will receive an activation email with your login link.",
+            variant: "success",
+            onConfirm: () => {
+              setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+              navigate("/");
+            },
+            showCancel: false,
+            confirmText: "Go to Login",
+          });
+        } else {
+          toast.error(verifyRes.message || "Payment verification failed.");
+        }
+      } catch (err) {
+        setIsVerifyingPayment(false);
+        console.error("Return payment error:", err);
+        if (err.message && err.message.toLowerCase().includes("already registered")) {
+          toast.success("Payment verified! Your account is pending admin approval.");
+          setConfirmModal({
+            isOpen: true,
+            title: "Registration Received",
+            message:
+              "Your payment and registration details are with our administrator. Once approved, you will receive an activation email with your login link.",
+            variant: "success",
+            onConfirm: () => {
+              setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+              navigate("/");
+            },
+            showCancel: false,
+            confirmText: "Go to Login",
+          });
+        } else {
+          toast.error(err.message || "Payment verification error");
+        }
+      }
+    } else if (orderId) {
+      setIsVerifyingPayment(false);
+    }
+  };
 
   const fetchPlans = async () => {
     try {
@@ -134,8 +207,6 @@ const Signup = () => {
       !formData.name ||
       !formData.email ||
       !formData.phone ||
-      !formData.password ||
-      !formData.confirmPassword ||
       !formData.address ||
       !formData.city ||
       !formData.state
@@ -145,10 +216,6 @@ const Signup = () => {
     if (!/\S+@\S+\.\S+/.test(formData.email)) return "Invalid email address";
     if (!/^\d{10}$/.test(formData.phone))
       return "Phone number must be 10 digits";
-    if (formData.password !== formData.confirmPassword)
-      return "Passwords do not match";
-    if (formData.password.length < 6)
-      return "Password must be at least 6 characters";
     return null;
   };
 
@@ -161,41 +228,195 @@ const Signup = () => {
       return;
     }
 
+    if (!selectedPlan) {
+      toast.error("Please choose a subscription plan first.");
+      setStep(1);
+      return;
+    }
+
     setIsSubmitting(true);
+    setError("");
+
     try {
-      const payload = {
-        ...formData,
-        plan: selectedPlan._id,
+      const planPrice = Number(selectedPlan.price) || 0;
+
+      // If plan is 0 / free, fallback gracefully to direct registration
+      if (planPrice <= 0) {
+        const payload = {
+          ...formData,
+          plan: selectedPlan._id,
+        };
+        const res = await mainVendorSignup(payload);
+        if (res.status) {
+          toast.success(res.message || "Registration request submitted!");
+          setConfirmModal({
+            isOpen: true,
+            title: "Registration Successful",
+            message:
+              "Vendor subscription request received. Our team will review your application and contact you soon.",
+            variant: "success",
+            onConfirm: () => {
+              setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+              navigate("/");
+            },
+            showCancel: false,
+            confirmText: "OK",
+          });
+        } else {
+          setError(res.message || "Signup failed");
+          toast.error(res.message || "Signup failed");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Step 1: Create Cashfree order session
+      const orderRes = await createVendorPaymentOrder({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        planId: selectedPlan._id,
+      });
+
+      if (!orderRes.status || !orderRes.paymentSessionId) {
+        throw new Error(orderRes.message || "Could not generate payment session.");
+      }
+
+      const { paymentSessionId, orderId, environment } = orderRes;
+
+      // Dynamically load Cashfree SDK on demand
+      const CashfreeConstructor = await loadCashfreeSdk();
+
+      // Initialize Cashfree instance (sandbox or production)
+      const cashfree = CashfreeConstructor({
+        mode: environment === "PRODUCTION" ? "production" : "sandbox",
+      });
+
+      // Step 2: Save registration payload for full-screen redirect return
+      sessionStorage.setItem(
+        "pending_vendor_signup",
+        JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          plan: selectedPlan._id,
+        })
+      );
+
+      // Open Cashfree Drop Checkout (Full screen)
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId,
+        redirectTarget: "_self", // Full screen in same tab
       };
 
-      const res = await mainVendorSignup(payload);
-      if (res.status) {
-        toast.success(res.message || "Registration request submitted!");
-        setConfirmModal({
-          isOpen: true,
-          title: "Registration Successful",
-          message:
-            "Vendor subscription request received. Our team will review your application and contact you soon.",
-          variant: "success",
-          onConfirm: () => {
-            setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-            navigate("/");
-          },
-          showCancel: false,
-          confirmText: "OK",
+      cashfree
+        .checkout(checkoutOptions)
+        .then(async (result) => {
+          if (result.error) {
+            console.error("Cashfree checkout error:", result.error);
+            toast.error(result.error.message || "Payment cancelled or failed.");
+            setIsSubmitting(false);
+            return;
+          }
+
+          if (result.paymentDetails) {
+            console.log("Cashfree payment success callback:", result.paymentDetails);
+          }
+
+          // Step 3: Verify payment on backend and complete registration
+          try {
+            const verifyPayload = {
+              orderId,
+              name: formData.name,
+              email: formData.email,
+              password: formData.password,
+              phone: formData.phone,
+              address: formData.address,
+              city: formData.city,
+              state: formData.state,
+              plan: selectedPlan._id,
+            };
+
+            const verifyRes = await verifyAndRegisterVendor(verifyPayload);
+
+            if (verifyRes.status) {
+              toast.success(
+                "Payment received! Registration submitted for admin approval."
+              );
+              setConfirmModal({
+                isOpen: true,
+                title: "Payment Received Successfully!",
+                message:
+                  "Thank you! Your payment has been confirmed. Your account details have been sent to our administrator for review. Once approved, you will receive an activation email with your login link.",
+                variant: "success",
+                onConfirm: () => {
+                  setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+                  navigate("/");
+                },
+                showCancel: false,
+                confirmText: "Go to Login",
+              });
+            } else {
+              toast.error(
+                verifyRes.message || "Payment verification failed. Please contact support."
+              );
+              setError(verifyRes.message || "Verification failed");
+            }
+          } catch (verifyErr) {
+            console.error("Verification error:", verifyErr);
+            toast.error(
+              verifyErr.message ||
+                "Failed to verify payment with server. Please contact support with Order ID: " +
+                  orderId
+            );
+            setError(verifyErr.message);
+          } finally {
+            setIsSubmitting(false);
+          }
+        })
+        .catch((checkoutErr) => {
+          console.error("Cashfree popup error:", checkoutErr);
+          toast.error(checkoutErr.message || "Payment checkout failed");
+          setIsSubmitting(false);
         });
-      } else {
-        setError(res.message || "Signup failed");
-        toast.error(res.message || "Signup failed");
-      }
     } catch (err) {
+      console.error("Signup flow error:", err);
       const msg = err.message || "Server error occurred";
       setError(msg);
       toast.error(msg);
-    } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isVerifyingPayment) {
+    return (
+      <div className="signup-page">
+        <div className="signup-loading">
+          <Loader className="spinner" size={40} />
+          <p style={{ marginTop: "16px", fontWeight: "600", fontSize: "18px" }}>
+            Verifying your payment with Cashfree...
+          </p>
+          <p style={{ color: "#777", fontSize: "14px" }}>
+            Please wait a moment while we set up your registration.
+          </p>
+        </div>
+        <ConfirmationModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          variant={confirmModal.variant}
+          showCancel={confirmModal.showCancel}
+          confirmText={confirmModal.confirmText}
+        />
+      </div>
+    );
+  }
 
   if (loadingPlans) {
     return (
@@ -324,61 +545,6 @@ const Signup = () => {
                     required
                   />
                 </div>
-
-                <h3 className="form-subtitle" style={{ marginTop: "20px" }}>
-                  Security
-                </h3>
-                <div className="form-group">
-                  <label>
-                    <Lock size={16} /> Password *
-                  </label>
-                  <div className="password-wrapper">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Min 6 characters"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-eye"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    <Lock size={16} /> Confirm Password *
-                  </label>
-                  <div className="password-wrapper">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Re-enter password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="toggle-eye"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-                  </div>
-                </div>
               </div>
 
               <div className="form-column">
@@ -446,9 +612,10 @@ const Signup = () => {
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader className="spinner" size={18} /> Sending
-                        Request...
+                        <Loader className="spinner" size={18} /> Processing...
                       </>
+                    ) : selectedPlan?.price > 0 ? (
+                      `Pay ₹${selectedPlan.price} & Register`
                     ) : (
                       "Submit Vendor Request"
                     )}

@@ -12,8 +12,14 @@ const jwt = require("jsonwebtoken");
 const Vendor = require("../models/vendor");
 const Seller = require("../models/seller");
 const Buyer = require("../models/buyer");
+const Transaction = require("../models/transaction");
 const { cleanupExpiredSessions } = require("./sessionController");
 const { getTemplateSubject } = require("./emailTemplateController");
+const {
+  createCashfreeOrder,
+  getCashfreeOrder,
+  getCashfreeOrderPayments,
+} = require("../utils/cashfree");
 
 function addDays(date, days) {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
@@ -23,22 +29,78 @@ exports.getMainVendors = async (req, res) => {
   try {
     const mainVendors = await MainVendor.find()
       .populate("plan", "name planId price durationType durationValue branchCount")
-      .populate("requestedPlan", "name planId price");
+      .populate("requestedPlan", "name planId price")
+      .populate("queuedPlan", "name planId price durationType durationValue branchCount")
+      .sort({ createdAt: -1, joinedDate: -1, _id: -1 });
+
+    const now = new Date();
+    // Auto-promote queued plans whose current plan has expired
+    for (const vendor of mainVendors) {
+      if (
+        vendor.queuedPlan &&
+        vendor.queuedPlanStartDate &&
+        now >= new Date(vendor.queuedPlanStartDate)
+      ) {
+        vendor.plan = vendor.queuedPlan._id || vendor.queuedPlan;
+        vendor.planEndDate = vendor.queuedPlanEndDate || vendor.planEndDate;
+        vendor.queuedPlan = null;
+        vendor.queuedPlanStartDate = null;
+        vendor.queuedPlanEndDate = null;
+        vendor.upgradeType = null;
+        await vendor.save();
+      }
+    }
 
     const mainVendorIds = mainVendors.map((v) => v._id);
 
-    const activeSubscriptions = await UserSubscription.find({
+    const allSubscriptions = await UserSubscription.find({
       userId: { $in: mainVendorIds },
-      endDate: { $gte: new Date() },
     }).sort({ createdAt: -1 });
 
     const mainVendorsWithSub = mainVendors.map((vendor) => {
-      const sub = activeSubscriptions.find(
-        (s) => s.userId.toString() === vendor._id.toString(),
+      const vendorSubs = allSubscriptions.filter(
+        (s) => s.userId.toString() === vendor._id.toString()
       );
+
+      // Find current active subscription matching vendor's current plan
+      let activeSub =
+        vendorSubs.find(
+          (s) =>
+            vendor.plan &&
+            s.subscriptionId &&
+            s.subscriptionId.toString() === (vendor.plan._id || vendor.plan).toString() &&
+            (!vendor.queuedPlanStartDate || new Date(s.startDate) < new Date(vendor.queuedPlanStartDate))
+        ) ||
+        vendorSubs.find((s) => new Date(s.startDate) <= now) ||
+        vendorSubs[0];
+
+      let computedStartDate =
+        vendor.planStartDate ||
+        activeSub?.startDate ||
+        vendor.joinedDate ||
+        vendor.createdAt;
+
+      // Ensure planStartDate is not erroneously identical to planEndDate
+      if (
+        vendor.planEndDate &&
+        computedStartDate &&
+        new Date(computedStartDate).getTime() >= new Date(vendor.planEndDate).getTime()
+      ) {
+        computedStartDate = vendor.joinedDate || vendor.createdAt || new Date(new Date(vendor.planEndDate).getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+
+      if (activeSub) {
+        activeSub = {
+          ...activeSub.toObject(),
+          startDate: computedStartDate,
+          endDate: vendor.planEndDate || activeSub.endDate,
+        };
+      }
+
       return {
         ...vendor.toObject(),
-        activeSubscription: sub || null,
+        planStartDate: computedStartDate,
+        activeSubscription: activeSub || null,
       };
     });
 
@@ -51,14 +113,18 @@ exports.getMainVendors = async (req, res) => {
 
 exports.createMainVendor = async (req, res) => {
   try {
-    let { name, email, phone, address, city, state, plan, status } = req.body;
-
-    const planExists = await Plan.findById(plan);
-    if (!planExists) {
-      return res
-        .status(400)
-        .json({ status: false, message: "Invalid subscription plan." });
-    }
+    let {
+      name,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      plan,
+      status,
+      isTrial,
+      trialDays,
+    } = req.body;
 
     const emailExists = await MainVendor.findOne({ email });
     if (emailExists) {
@@ -67,18 +133,176 @@ exports.createMainVendor = async (req, res) => {
         .json({ status: false, message: "Email is already in use" });
     }
 
+    const isTrialSelected =
+      isTrial === true ||
+      isTrial === "true" ||
+      isTrial === 1 ||
+      isTrial === "1";
+
     const plainPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-    let planEndDate = new Date();
-    if (planExists.durationType === "year") {
-      planEndDate.setFullYear(
-        planEndDate.getFullYear() + (planExists.durationValue || 1),
-      );
-    } else {
-      planEndDate = addDays(planEndDate, 30 * (planExists.durationValue || 1));
+    const clientBaseUrl = (
+      process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system"
+    ).replace(/\/$/, "");
+
+    // ----------------------------------------------------
+    // CASE A: FREE TRIAL (Custom Days >= 1)
+    // ----------------------------------------------------
+    if (isTrialSelected) {
+      const parsedDays = parseInt(trialDays, 10);
+      if (isNaN(parsedDays) || parsedDays <= 0) {
+        return res.status(400).json({
+          status: false,
+          message: "Free trial days must be a positive number (minimum 1 day).",
+        });
+      }
+
+      let planEndDate = new Date();
+      planEndDate.setDate(planEndDate.getDate() + parsedDays);
+      planEndDate.setHours(23, 59, 59, 999);
+
+      const newMainVendor = new MainVendor({
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        address,
+        city,
+        state,
+        plan: plan || undefined,
+        isTrial: true,
+        trialDays: parsedDays,
+        planEndDate,
+        status: "Active",
+        paymentStatus: "Paid",
+        joinedDate: new Date(),
+      });
+
+      await newMainVendor.save();
+
+      await UserSubscription.create({
+        userId: newMainVendor._id,
+        subscriptionId: plan || undefined,
+        priceAtPurchase: 0,
+        branchCount: 999,
+        featuresAtPurchase: { trial: true, trialDays: parsedDays },
+        startDate: new Date(),
+        endDate: planEndDate,
+      });
+
+      // Send Free Trial Email with Direct Login Button
+      try {
+        const loginUrl = `${clientBaseUrl}/`;
+        const emailContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Your Free Trial Account Has Been Created</title>
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:'Segoe UI', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; margin:40px 0; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+                  <tr>
+                    <td align="center" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); padding:30px 20px; color:#ffffff;">
+                      <h1 style="margin:0; font-size:24px; font-weight:700;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                      <p style="margin:6px 0 0; font-size:15px; opacity:0.95;">Free Trial Account Activated</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:32px 30px; color:#334155;">
+                      <h2 style="margin-top:0; color:#0f172a; font-size:20px;">Hello ${name},</h2>
+                      <p style="font-size:15px; line-height:1.6;">
+                        Your vendor account has been created by the Admin with a <strong>${parsedDays}-Day Free Trial</strong>.
+                      </p>
+                      
+                      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px 20px; margin:24px 0;">
+                        <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;">
+                          <tr>
+                            <td width="35%" style="color:#64748b;"><strong>Registered Email:</strong></td>
+                            <td style="color:#0f172a;">${email}</td>
+                          </tr>
+                          <tr>
+                            <td style="color:#64748b;"><strong>Account Type:</strong></td>
+                            <td style="color:#10b981; font-weight:700;">Free Trial (${parsedDays} Days)</td>
+                          </tr>
+                          <tr>
+                            <td style="color:#64748b;"><strong>Trial Valid Till:</strong></td>
+                            <td style="color:#0f172a; font-weight:600;">${planEndDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <p style="font-size:14px; color:#64748b; line-height:1.5;">
+                        You can sign in directly to your vendor dashboard using your email address and a one-time password (OTP).
+                      </p>
+
+                      <div style="text-align:center; margin:30px 0;">
+                        <a href="${loginUrl}" 
+                           style="background:#10b981; color:#ffffff; padding:14px 32px; text-decoration:none; border-radius:8px; font-size:15px; font-weight:700; display:inline-block; box-shadow:0 4px 10px rgba(16,185,129,0.35);">
+                          Login to Your Account
+                        </a>
+                      </div>
+
+                      <p style="margin:20px 0 0; font-size:13px; color:#94a3b8; text-align:center;">
+                        If the button doesn't open, copy this link to your browser: <br/>
+                        <a href="${loginUrl}" style="color:#10b981;">${loginUrl}</a>
+                      </p>
+
+                      <hr style="border:none; border-top:1px solid #e2e8f0; margin:28px 0 20px;" />
+                      <p style="margin:0; font-size:14px; color:#475569;">Regards,<br/><strong>${process.env.COMPANY_NAME || "AuctionBilling"} Team</strong></p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="background:#f8fafc; padding:18px; font-size:12px; color:#94a3b8; border-top:1px solid #f1f5f9;">
+                      <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        `;
+
+        await sendEmail(
+          email,
+          `Welcome to ${process.env.COMPANY_NAME || "AuctionBilling"} - ${parsedDays} Days Free Trial`,
+          emailContent
+        );
+      } catch (emailErr) {
+        console.error("Free trial welcome email error:", emailErr);
+      }
+
+      return res.status(201).json({
+        status: true,
+        message: `Vendor created successfully with ${parsedDays} days free trial! Welcome email sent.`,
+        vendor: newMainVendor,
+      });
     }
 
+    // ----------------------------------------------------
+    // CASE B: PAID SUBSCRIPTION PLAN
+    // ----------------------------------------------------
+    if (!plan) {
+      return res.status(400).json({
+        status: false,
+        message: "Please choose a subscription plan or enable Free Trial.",
+      });
+    }
+
+    const planExists = await Plan.findById(plan);
+    if (!planExists) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid subscription plan." });
+    }
+
+    // Create vendor with status Pending awaiting payment
     const newMainVendor = new MainVendor({
       name,
       email,
@@ -87,68 +311,84 @@ exports.createMainVendor = async (req, res) => {
       address,
       city,
       state,
-      plan,
-      planEndDate,
-      status: status || "Active",
+      plan: planExists._id,
+      isTrial: false,
+      trialDays: 0,
+      status: "Pending", // Awaiting payment
+      paymentStatus: "Pending",
       joinedDate: new Date(),
     });
 
     await newMainVendor.save();
 
-    await UserSubscription.create({
-      userId: newMainVendor._id,
-      subscriptionId: planExists._id,
-      priceAtPurchase: planExists.price,
-      branchCount: planExists.branchCount || 0,
-      featuresAtPurchase: planExists.features || {},
-      startDate: new Date(),
-      endDate: planEndDate,
-    });
+    // Direct Checkout Link for Vendor to Pay
+    const payLink = `${clientBaseUrl}/pay-subscription?vendorId=${newMainVendor._id}`;
 
-    // Send Email (HTML formatted)
+    // Send Email to Vendor with Direct "Pay Now" Button
     try {
       const emailContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
-        <title>Main Vendor Account Created</title>
+        <title>Account Created - Complete Your Subscription Payment</title>
       </head>
-      <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;">
+      <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:'Segoe UI', Arial, sans-serif;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; margin:40px 0; border-radius:8px; overflow:hidden;">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; margin:40px 0; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
                 <tr>
-                  <td align="center" style="background:#F39C12; padding:25px; color:#ffffff;">
-                    <h1 style="margin:0; font-size:24px;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
-                    <p style="margin:5px 0 0; font-size:14px;">Main Vendor Account Details</p>
+                  <td align="center" style="background:linear-gradient(135deg, #F39C12 0%, #d97706 100%); padding:30px 20px; color:#ffffff;">
+                    <h1 style="margin:0; font-size:24px; font-weight:700;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                    <p style="margin:6px 0 0; font-size:15px; opacity:0.95;">Account Created by Admin</p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:30px; color:#333333;">
-                    <h2 style="margin-top:0;">Hello ${name},</h2>
-                    <p>Welcome! Your Main Vendor account has been successfully created.</p>
-                    <p>Below are your account and plan details:</p>
-                    <table width="100%" cellpadding="8" cellspacing="0" style="background:#f8f9fa; border-radius:6px; margin-bottom:20px;">
-                      <tr>
-                        <td><strong>Email:</strong></td>
-                        <td>${email}</td>
-                      </tr>
-                    </table>
-                    <p>Your subscription plan is <strong>${planExists.name}</strong> and Valid till <strong>${planEndDate.toLocaleDateString()}</strong>.</p>
-                    <p style="margin-top:20px;">Click the button below to log in to your account.</p>
-                    <div style="text-align:center; margin:25px 0;">
-                      <a href="${process.env.CLIENT_URL || "http://localhost:5173"}" 
-                         style="background:#F39C12; color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
-                        Login to Your Account
+                  <td style="padding:32px 30px; color:#334155;">
+                    <h2 style="margin-top:0; color:#0f172a; font-size:20px;">Hello ${name},</h2>
+                    <p style="font-size:15px; line-height:1.6;">
+                      Your vendor account has been created by the Admin for the <strong>${planExists.name}</strong> plan.
+                    </p>
+                    <p style="font-size:14px; color:#64748b; margin-top:4px;">
+                      Please complete your subscription payment to activate your account and start using the platform.
+                    </p>
+                    
+                    <div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:18px 20px; margin:24px 0;">
+                      <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;">
+                        <tr>
+                          <td width="35%" style="color:#78350f;"><strong>Vendor Name:</strong></td>
+                          <td style="color:#0f172a;">${name}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#78350f;"><strong>Selected Plan:</strong></td>
+                          <td style="color:#0f172a; font-weight:700;">${planExists.name}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#78350f;"><strong>Amount Payable:</strong></td>
+                          <td style="color:#d97706; font-size:18px; font-weight:800;">₹${planExists.price}</td>
+                        </tr>
+                      </table>
+                    </div>
+
+                    <div style="text-align:center; margin:32px 0;">
+                      <a href="${payLink}" 
+                         style="background:#F39C12; color:#ffffff; padding:15px 36px; text-decoration:none; border-radius:8px; font-size:16px; font-weight:700; display:inline-block; box-shadow:0 4px 12px rgba(243,156,18,0.4);">
+                        Pay Now ₹${planExists.price}
                       </a>
                     </div>
-                    <p>Regards,<br/>${process.env.COMPANY_NAME || "AuctionBilling"} Team</p>
+
+                    <p style="margin:20px 0 0; font-size:13px; color:#94a3b8; text-align:center;">
+                      If button doesn't open, copy this link to your browser: <br/>
+                      <a href="${payLink}" style="color:#F39C12;">${payLink}</a>
+                    </p>
+
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:28px 0 20px;" />
+                    <p style="margin:0; font-size:14px; color:#475569;">Regards,<br/><strong>${process.env.COMPANY_NAME || "AuctionBilling"} Team</strong></p>
                   </td>
                 </tr>
                 <tr>
-                  <td align="center" style="background:#f1f1f1; padding:20px; font-size:12px; color:#777;">
+                  <td align="center" style="background:#f8fafc; padding:18px; font-size:12px; color:#94a3b8; border-top:1px solid #f1f5f9;">
                     <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
                   </td>
                 </tr>
@@ -159,19 +399,24 @@ exports.createMainVendor = async (req, res) => {
       </body>
       </html>
       `;
-      const emailSubject = await getTemplateSubject(
-        "main_vendor_account_created",
-        "Your Account for AUCTION BILLING is created."
+
+      await sendEmail(
+        email,
+        `Complete Your Subscription Payment - ${planExists.name} Plan`,
+        emailContent
       );
-      await sendEmail(email, emailSubject, emailContent);
-    } catch (e) {
-      console.error("Email error:", e);
+    } catch (emailErr) {
+      console.error("Paid plan email error:", emailErr);
     }
 
-    res.status(201).json({ status: true, message: "Main Vendor created" });
+    res.status(201).json({
+      status: true,
+      message: `Vendor account created for ${planExists.name}! Payment link sent to ${email}.`,
+      vendor: newMainVendor,
+    });
   } catch (error) {
     console.error("Create main vendor error:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
+    res.status(500).json({ status: false, message: error.message || "Internal server error" });
   }
 };
 
@@ -830,17 +1075,6 @@ exports.sendLoginOtp = async (req, res) => {
       });
     }
 
-    if (
-      mainVendor.planEndDate &&
-      new Date() > new Date(mainVendor.planEndDate)
-    ) {
-      return res.status(403).json({
-        status: false,
-        message: "Your subscription plan has expired. Please renew to continue.",
-        planExpired: true,
-      });
-    }
-
     // Generate 6-digit OTP valid for 5 minutes
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     mainVendor.otp = otp;
@@ -934,17 +1168,6 @@ exports.verifyLoginOtp = async (req, res) => {
       return res.status(403).json({
         status: false,
         message: "Your account is not active. Please contact support.",
-      });
-    }
-
-    if (
-      mainVendor.planEndDate &&
-      new Date() > new Date(mainVendor.planEndDate)
-    ) {
-      return res.status(403).json({
-        status: false,
-        message: "Your subscription plan has expired. Please renew to continue.",
-        planExpired: true,
       });
     }
 
@@ -1120,7 +1343,8 @@ exports.signup = async (req, res) => {
         .json({ status: false, message: "Email is already in use" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const rawPassword = password || Math.random().toString(36).slice(-10);
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const newMainVendor = new MainVendor({
       name,
@@ -1231,6 +1455,908 @@ exports.signup = async (req, res) => {
     res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
+
+/**
+ * Step 1: Create Cashfree payment order for selected plan
+ */
+exports.createPaymentOrder = async (req, res) => {
+  try {
+    const { name, email, phone, planId } = req.body;
+
+    if (!email || !planId) {
+      return res.status(400).json({
+        status: false,
+        message: "Email and Plan are required",
+      });
+    }
+
+    const emailExists = await MainVendor.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({
+        status: false,
+        message: "Email is already registered",
+      });
+    }
+
+    const plan = await Plan.findById(planId);
+    if (!plan) {
+      return res.status(404).json({
+        status: false,
+        message: "Subscription plan not found",
+      });
+    }
+
+    // Cashfree order amount must be at least 1 INR
+    const orderAmount = Number(plan.price) || 0;
+    if (orderAmount <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: "This plan cannot be purchased online (free/zero amount).",
+      });
+    }
+
+    // Unique order ID (max 45 chars alphanumeric/underscore)
+    const orderId = `VEND_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    const orderData = await createCashfreeOrder({
+      orderId,
+      orderAmount,
+      customerPhone: phone || "9999999999",
+      customerEmail: email,
+      customerName: name || "Vendor",
+      customerNote: `Subscription: ${plan.name}`,
+    });
+
+    res.status(200).json({
+      status: true,
+      orderId: orderData.order_id,
+      paymentSessionId: orderData.payment_session_id,
+      orderAmount,
+      planName: plan.name,
+      environment: (process.env.CASHFREE_ENVIRONMENT || "SANDBOX").toUpperCase(),
+    });
+  } catch (error) {
+    console.error("Create Cashfree payment order error:", error.response?.data || error.message);
+    res.status(500).json({
+      status: false,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to initiate payment. Please verify Cashfree configuration.",
+    });
+  }
+};
+
+/**
+ * Step 2: Verify Cashfree payment, then register vendor with status Pending
+ */
+exports.verifyAndSignup = async (req, res) => {
+  try {
+    const { orderId, name, email, password, phone, address, city, state, plan } =
+      req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        status: false,
+        message: "Cashfree Order ID is required for verification.",
+      });
+    }
+
+    const existingVendor = await MainVendor.findOne({ email });
+    if (existingVendor) {
+      // If this vendor was already saved for this specific Cashfree order, return success
+      if (existingVendor.cashfreeOrderId === orderId) {
+        return res.status(200).json({
+          status: true,
+          message: "Payment verified and registration submitted successfully! Your account is pending admin approval.",
+          vendor: {
+            id: existingVendor._id,
+            name: existingVendor.name,
+            email: existingVendor.email,
+            status: existingVendor.status,
+            paymentStatus: existingVendor.paymentStatus,
+          },
+        });
+      }
+      return res.status(400).json({
+        status: false,
+        message: "Email is already registered.",
+      });
+    }
+
+    const planExists = await Plan.findById(plan);
+    if (!planExists) {
+      return res.status(400).json({
+        status: false,
+        message: "Selected plan does not exist.",
+      });
+    }
+
+    // Verify order with Cashfree API
+    let cfOrder;
+    try {
+      cfOrder = await getCashfreeOrder(orderId);
+    } catch (cfErr) {
+      console.error("Cashfree order fetch error:", cfErr.response?.data || cfErr.message);
+      return res.status(400).json({
+        status: false,
+        message: "Unable to verify payment with Cashfree. Please contact support.",
+      });
+    }
+
+    if (cfOrder.order_status !== "PAID") {
+      return res.status(400).json({
+        status: false,
+        message: `Payment is not completed. Current status: ${cfOrder.order_status}`,
+      });
+    }
+
+    // Get payment ID if available
+    let paymentId = "";
+    try {
+      const payments = await getCashfreeOrderPayments(orderId);
+      if (Array.isArray(payments) && payments.length > 0) {
+        const successfulPayment = payments.find((p) => p.payment_status === "SUCCESS") || payments[0];
+        paymentId = successfulPayment.cf_payment_id ? String(successfulPayment.cf_payment_id) : "";
+      }
+    } catch (payErr) {
+      console.warn("Could not fetch detailed payment list:", payErr.message);
+    }
+
+    const rawPassword = password || Math.random().toString(36).slice(-10);
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+    const newMainVendor = new MainVendor({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      address,
+      city,
+      state,
+      plan,
+      status: "Pending",
+      paymentStatus: "Paid",
+      cashfreeOrderId: orderId,
+      cashfreePaymentId: paymentId,
+      paidAmount: Number(cfOrder.order_amount) || planExists.price,
+      paidAt: new Date(),
+    });
+
+    await newMainVendor.save();
+
+    // Admin Notification
+    try {
+      await Notification.create({
+        userId: newMainVendor._id,
+        userModel: "MainVendor",
+        senderName: name,
+        title: "New Paid Vendor Registration (Pending Approval)",
+        message: `Vendor ${name} (${email}) completed payment ₹${cfOrder.order_amount} for plan ${planExists.name}. Waiting for approval.`,
+        type: "new_registration",
+        recipient: "admin",
+      });
+    } catch (e) {
+      console.error("Admin notification error:", e);
+    }
+
+    // Send acknowledgement email to Vendor
+    try {
+      const emailContent = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Payment Successful - Subscription Request Received</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" border="0" 
+                 style="background:#ffffff; margin:40px 0; border-radius:8px; overflow:hidden;">
+            <tr>
+              <td align="center" style="background:#27ae60; padding:25px; color:#ffffff;">
+                <h1 style="margin:0; font-size:24px;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                <p style="margin:5px 0 0; font-size:14px;">Payment Received • Pending Admin Approval</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px; color:#333333;">
+                <h2 style="margin-top:0;">Hello ${name},</h2>
+                <p>We have successfully received your payment of <strong>₹${cfOrder.order_amount}</strong> for the <strong>${planExists.name}</strong> plan.</p>
+                <p>Your application is currently under admin review. Once approved, your account will be activated and you will receive a login notification email.</p>
+                
+                <h3 style="margin-top:20px; margin-bottom:10px;">Payment Summary:</h3>
+                <table width="100%" cellpadding="8" cellspacing="0" style="background:#f8f9fa; border-radius:6px; margin-bottom:20px;">
+                  <tr>
+                    <td><strong>Order ID:</strong></td>
+                    <td>${orderId}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Transaction / Payment ID:</strong></td>
+                    <td>${paymentId || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Plan Name:</strong></td>
+                    <td>${planExists.name}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Amount Paid:</strong></td>
+                    <td>₹${cfOrder.order_amount}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Status:</strong></td>
+                    <td style="color:#e67e22; font-weight:bold;">Pending Admin Approval</td>
+                  </tr>
+                </table>
+                
+                <p>Thank you for choosing ${process.env.COMPANY_NAME || "AuctionBilling"}!</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="background:#f1f1f1; padding:20px; font-size:12px; color:#777;">
+                <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+      `;
+
+      const ackSubject = await getTemplateSubject(
+        "main_vendor_signup_received",
+        "Payment Successful - Account Pending Admin Approval"
+      );
+      await sendEmail(email, ackSubject, emailContent);
+    } catch (emailErr) {
+      console.error("Signup email error:", emailErr);
+    }
+
+    res.status(201).json({
+      status: true,
+      message:
+        "Payment verified and registration submitted successfully! Your account is pending admin approval.",
+      vendor: {
+        id: newMainVendor._id,
+        name: newMainVendor.name,
+        email: newMainVendor.email,
+        status: newMainVendor.status,
+        paymentStatus: newMainVendor.paymentStatus,
+      },
+    });
+  } catch (error) {
+    console.error("Verify and signup error:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
+  }
+};
+
+/**
+ * Public: Get vendor details & plan info for email pay-now link
+ */
+exports.getVendorPaymentDetails = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const vendor = await MainVendor.findById(vendorId).populate("plan");
+
+    if (!vendor) {
+      return res.status(404).json({ status: false, message: "Vendor account not found." });
+    }
+
+    if (vendor.paymentStatus === "Paid" && vendor.status === "Active") {
+      return res.status(200).json({
+        status: true,
+        alreadyPaid: true,
+        message: "Your subscription is already paid and active. You can log in directly.",
+        vendor: {
+          id: vendor._id,
+          name: vendor.name,
+          email: vendor.email,
+          planName: vendor.plan?.name || "Active Plan",
+          planPrice: vendor.plan?.price || vendor.paidAmount || 0,
+          paidAmount: vendor.paidAmount || vendor.plan?.price || 0,
+          planEndDate: vendor.planEndDate,
+          durationType: vendor.plan?.durationType || "month",
+          durationValue: vendor.plan?.durationValue || 1,
+        },
+      });
+    }
+
+    if (!vendor.plan) {
+      return res.status(400).json({ status: false, message: "No subscription plan assigned to this account." });
+    }
+
+    res.status(200).json({
+      status: true,
+      alreadyPaid: false,
+      vendor: {
+        id: vendor._id,
+        name: vendor.name,
+        email: vendor.email,
+        phone: vendor.phone,
+        planId: vendor.plan._id,
+        planName: vendor.plan.name,
+        planPrice: vendor.plan.price,
+        durationType: vendor.plan.durationType,
+        durationValue: vendor.plan.durationValue,
+      },
+    });
+  } catch (error) {
+    console.error("getVendorPaymentDetails error:", error);
+    res.status(500).json({ status: false, message: "Error fetching payment details." });
+  }
+};
+
+/**
+ * Public: Create Cashfree order for direct vendor checkout from email pay button
+ */
+exports.createVendorCheckoutOrder = async (req, res) => {
+  try {
+    const { vendorId } = req.body;
+    const vendor = await MainVendor.findById(vendorId).populate("plan");
+
+    if (!vendor || !vendor.plan) {
+      return res.status(404).json({ status: false, message: "Vendor or plan not found." });
+    }
+
+    const orderAmount = Number(vendor.plan.price) || 0;
+    if (orderAmount <= 0) {
+      return res.status(400).json({ status: false, message: "Plan price must be greater than zero." });
+    }
+
+    const orderId = `PAY_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const clientBaseUrl = (
+      process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system"
+    ).replace(/\/$/, "");
+
+    const returnUrl = `${clientBaseUrl}/pay-subscription?vendorId=${vendor._id}&order_id={order_id}`;
+
+    const orderData = await createCashfreeOrder({
+      orderId,
+      orderAmount,
+      customerPhone: vendor.phone || "9999999999",
+      customerEmail: vendor.email,
+      customerName: vendor.name || "Vendor",
+      customerNote: `Subscription Payment: ${vendor.plan.name}`,
+      returnUrl,
+    });
+
+    res.status(200).json({
+      status: true,
+      orderId: orderData.order_id,
+      paymentSessionId: orderData.payment_session_id,
+      orderAmount,
+      planName: vendor.plan.name,
+      environment: (process.env.CASHFREE_ENVIRONMENT || "SANDBOX").toUpperCase(),
+    });
+  } catch (error) {
+    console.error("createVendorCheckoutOrder error:", error.response?.data || error.message);
+    res.status(500).json({
+      status: false,
+      message: error.response?.data?.message || error.message || "Failed to initiate payment.",
+    });
+  }
+};
+
+/**
+ * Public: Verify Cashfree payment, activate vendor, set plan end date, send confirmation email
+ */
+exports.verifyVendorCheckoutPayment = async (req, res) => {
+  try {
+    const { vendorId, orderId } = req.body;
+
+    if (!vendorId || !orderId) {
+      return res.status(400).json({ status: false, message: "Vendor ID and Order ID are required." });
+    }
+
+    const vendor = await MainVendor.findById(vendorId).populate("plan");
+    if (!vendor) {
+      return res.status(404).json({ status: false, message: "Vendor account not found." });
+    }
+
+    // Check if already processed
+    if (vendor.paymentStatus === "Paid" && vendor.status === "Active" && vendor.cashfreeOrderId === orderId) {
+      return res.status(200).json({
+        status: true,
+        message: "Payment already verified and account active!",
+        vendor: { id: vendor._id, name: vendor.name, email: vendor.email },
+      });
+    }
+
+    // Verify order with Cashfree
+    const cfOrder = await getCashfreeOrder(orderId);
+    if (cfOrder.order_status !== "PAID") {
+      return res.status(400).json({
+        status: false,
+        message: `Payment not completed. Current status: ${cfOrder.order_status}`,
+      });
+    }
+
+    // Get payment ID
+    let paymentId = "";
+    try {
+      const payments = await getCashfreeOrderPayments(orderId);
+      if (Array.isArray(payments) && payments.length > 0) {
+        const successful = payments.find((p) => p.payment_status === "SUCCESS") || payments[0];
+        paymentId = successful.cf_payment_id ? String(successful.cf_payment_id) : "";
+      }
+    } catch (payErr) {
+      console.warn("Could not fetch detailed payment list:", payErr.message);
+    }
+
+    // Calculate plan end date
+    const plan = vendor.plan;
+    let planEndDate = new Date();
+    if (plan.durationType === "year") {
+      planEndDate.setFullYear(planEndDate.getFullYear() + (plan.durationValue || 1));
+    } else {
+      planEndDate = addDays(planEndDate, 30 * (plan.durationValue || 1));
+    }
+
+    // Activate vendor
+    vendor.status = "Active";
+    vendor.paymentStatus = "Paid";
+    vendor.planEndDate = planEndDate;
+    vendor.cashfreeOrderId = orderId;
+    vendor.cashfreePaymentId = paymentId;
+    vendor.paidAmount = Number(cfOrder.order_amount) || plan.price;
+    vendor.paidAt = new Date();
+    await vendor.save();
+
+    // Create UserSubscription entry
+    await UserSubscription.create({
+      userId: vendor._id,
+      subscriptionId: plan._id,
+      priceAtPurchase: plan.price,
+      branchCount: plan.branchCount || 0,
+      featuresAtPurchase: plan.features || {},
+      startDate: new Date(),
+      endDate: planEndDate,
+    });
+
+    const clientBaseUrl = (
+      process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system"
+    ).replace(/\/$/, "");
+    const loginUrl = `${clientBaseUrl}/`;
+
+    // Send Confirmation Email with Login Button
+    try {
+      const emailContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Payment Successful - Account Activated</title>
+      </head>
+      <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:'Segoe UI', Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; margin:40px 0; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+                <tr>
+                  <td align="center" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); padding:30px 20px; color:#ffffff;">
+                    <h1 style="margin:0; font-size:24px; font-weight:700;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                    <p style="margin:6px 0 0; font-size:15px; opacity:0.95;">Payment Confirmed • Account Activated</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px 30px; color:#334155;">
+                    <h2 style="margin-top:0; color:#0f172a; font-size:20px;">Hello ${vendor.name},</h2>
+                    <p style="font-size:15px; line-height:1.6;">
+                      Thank you! We have received your payment of <strong>₹${cfOrder.order_amount}</strong> for the <strong>${plan.name}</strong> plan.
+                    </p>
+                    <p style="font-size:14px; color:#059669; font-weight:600;">
+                      Your account is now fully active and ready to use!
+                    </p>
+                    
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:18px 20px; margin:24px 0;">
+                      <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;">
+                        <tr>
+                          <td width="35%" style="color:#166534;"><strong>Plan Name:</strong></td>
+                          <td style="color:#0f172a; font-weight:700;">${plan.name}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#166534;"><strong>Amount Paid:</strong></td>
+                          <td style="color:#059669; font-weight:700;">₹${cfOrder.order_amount}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#166534;"><strong>Plan Valid Till:</strong></td>
+                          <td style="color:#0f172a; font-weight:600;">${planEndDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#166534;"><strong>Transaction ID:</strong></td>
+                          <td style="color:#0f172a;">${paymentId || orderId}</td>
+                        </tr>
+                      </table>
+                    </div>
+
+                    <div style="text-align:center; margin:30px 0;">
+                      <a href="${loginUrl}" 
+                         style="background:#10b981; color:#ffffff; padding:14px 34px; text-decoration:none; border-radius:8px; font-size:16px; font-weight:700; display:inline-block; box-shadow:0 4px 10px rgba(16,185,129,0.35);">
+                        Login to Your Account
+                      </a>
+                    </div>
+
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:28px 0 20px;" />
+                    <p style="margin:0; font-size:14px; color:#475569;">Regards,<br/><strong>${process.env.COMPANY_NAME || "AuctionBilling"} Team</strong></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="background:#f8fafc; padding:18px; font-size:12px; color:#94a3b8; border-top:1px solid #f1f5f9;">
+                    <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+      `;
+
+      await sendEmail(
+        vendor.email,
+        `Payment Received - Account Activated (${plan.name})`,
+        emailContent
+      );
+    } catch (emailErr) {
+      console.error("Activation email error:", emailErr);
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Payment verified successfully and account activated!",
+      vendor: {
+        id: vendor._id,
+        name: vendor.name,
+        email: vendor.email,
+        planName: plan.name,
+        planPrice: plan.price,
+        paidAmount: vendor.paidAmount || Number(cfOrder.order_amount) || plan.price,
+        cashfreeOrderId: orderId,
+        cashfreePaymentId: paymentId,
+        planEndDate,
+      },
+    });
+  } catch (error) {
+    console.error("verifyVendorCheckoutPayment error:", error);
+    res.status(500).json({ status: false, message: error.message || "Payment verification error." });
+  }
+};
+
+/**
+ * Step 1: Create Cashfree payment order for Plan Upgrade/Renewal
+ */
+exports.createUpgradePaymentOrder = async (req, res) => {
+  try {
+    const mainVendorId = req.user?.id;
+    const { planId, upgradeType } = req.body;
+
+    if (!planId) {
+      return res.status(400).json({
+        status: false,
+        message: "Plan ID is required.",
+      });
+    }
+
+    const vendor = await MainVendor.findById(mainVendorId);
+    if (!vendor) {
+      return res.status(404).json({
+        status: false,
+        message: "Vendor account not found.",
+      });
+    }
+
+    const plan = await Plan.findById(planId);
+    if (!plan) {
+      return res.status(404).json({
+        status: false,
+        message: "Selected subscription plan not found.",
+      });
+    }
+
+    const orderAmount = Number(plan.price) || 0;
+    if (orderAmount <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: "This plan amount is invalid for online payment.",
+      });
+    }
+
+    const orderId = `UPG_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const returnUrl = `${(process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system").replace(/\/$/, "")}/mainvendor/subscription?order_id={order_id}`;
+
+    const orderData = await createCashfreeOrder({
+      orderId,
+      orderAmount,
+      customerPhone: vendor.phone || "9999999999",
+      customerEmail: vendor.email,
+      customerName: vendor.name,
+      customerNote: `Upgrade: ${plan.name} (${upgradeType === "from_today" ? "Start Today" : "After Current"})`,
+      returnUrl,
+    });
+
+    res.status(200).json({
+      status: true,
+      orderId: orderData.order_id,
+      paymentSessionId: orderData.payment_session_id,
+      orderAmount,
+      planName: plan.name,
+      environment: (process.env.CASHFREE_ENVIRONMENT || "SANDBOX").toUpperCase(),
+    });
+  } catch (error) {
+    console.error("Create upgrade payment order error:", error.response?.data || error.message);
+    res.status(500).json({
+      status: false,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to initiate upgrade payment.",
+    });
+  }
+};
+
+/**
+ * Step 2: Verify Cashfree payment, immediately activate upgraded/renewed plan, and send email
+ */
+exports.verifyAndUpgradePlan = async (req, res) => {
+  try {
+    const mainVendorId = req.user?.id;
+    const { orderId, planId, upgradeType } = req.body;
+
+    if (!orderId || !planId) {
+      return res.status(400).json({
+        status: false,
+        message: "Order ID and Plan ID are required.",
+      });
+    }
+
+    const vendor = await MainVendor.findById(mainVendorId);
+    if (!vendor) {
+      return res.status(404).json({
+        status: false,
+        message: "Vendor account not found.",
+      });
+    }
+
+    const newPlan = await Plan.findById(planId);
+    if (!newPlan) {
+      return res.status(404).json({
+        status: false,
+        message: "Selected plan does not exist.",
+      });
+    }
+
+    // Idempotent: If already processed this upgrade order, return success
+    if (vendor.cashfreeOrderId === orderId && vendor.paymentStatus === "Paid") {
+      return res.status(200).json({
+        status: true,
+        message: `Plan upgraded to ${newPlan.name} successfully! Valid till ${new Date(vendor.planEndDate).toLocaleDateString()}.`,
+        plan: newPlan,
+        planEndDate: vendor.planEndDate,
+      });
+    }
+
+    // Verify order with Cashfree
+    let cfOrder;
+    try {
+      cfOrder = await getCashfreeOrder(orderId);
+    } catch (cfErr) {
+      console.error("Cashfree order verification error:", cfErr.response?.data || cfErr.message);
+      return res.status(400).json({
+        status: false,
+        message: "Unable to verify payment with Cashfree. Please contact support.",
+      });
+    }
+
+    if (cfOrder.order_status !== "PAID") {
+      return res.status(400).json({
+        status: false,
+        message: `Payment not completed. Current status: ${cfOrder.order_status}`,
+      });
+    }
+
+    // Fetch payment ID if available
+    let paymentId = "";
+    try {
+      const payments = await getCashfreeOrderPayments(orderId);
+      if (Array.isArray(payments) && payments.length > 0) {
+        const successfulPayment =
+          payments.find((p) => p.payment_status === "SUCCESS") || payments[0];
+        paymentId = successfulPayment.cf_payment_id
+          ? String(successfulPayment.cf_payment_id)
+          : "";
+      }
+    } catch (payErr) {
+      console.warn("Could not fetch detailed payment list:", payErr.message);
+    }
+
+    // Calculate new planEndDate based on user's choice: "from_today" vs "after_current"
+    const now = new Date();
+    const hasActiveUnexpiredPlan = vendor.planEndDate && new Date(vendor.planEndDate) > now;
+    let newPlanStartDate = now;
+    let newPlanEndDate = new Date();
+
+    if (upgradeType === "after_current" && hasActiveUnexpiredPlan) {
+      newPlanStartDate = new Date(vendor.planEndDate);
+      newPlanEndDate = new Date(vendor.planEndDate);
+    }
+
+    if (newPlan.durationType === "year") {
+      newPlanEndDate.setFullYear(
+        newPlanEndDate.getFullYear() + (newPlan.durationValue || 1)
+      );
+    } else {
+      newPlanEndDate.setDate(
+        newPlanEndDate.getDate() + 30 * (newPlan.durationValue || 1)
+      );
+    }
+
+    // If user chose "after_current" and still has active plan:
+    // Keep current plan active, and queue the new plan to automatically take effect when current plan ends!
+    if (upgradeType === "after_current" && hasActiveUnexpiredPlan) {
+      vendor.queuedPlan = newPlan._id;
+      vendor.queuedPlanStartDate = newPlanStartDate;
+      vendor.queuedPlanEndDate = newPlanEndDate;
+      vendor.requestedPlan = null;
+      vendor.upgradeType = "after_current";
+    } else {
+      // Immediate upgrade ("from_today" or current plan already expired)
+      vendor.plan = newPlan._id;
+      vendor.planEndDate = newPlanEndDate;
+      vendor.queuedPlan = null;
+      vendor.queuedPlanStartDate = null;
+      vendor.queuedPlanEndDate = null;
+      vendor.requestedPlan = null;
+      vendor.upgradeType = null;
+    }
+
+    vendor.status = "Active";
+    vendor.paymentStatus = "Paid";
+    vendor.cashfreeOrderId = orderId;
+    vendor.cashfreePaymentId = paymentId;
+    vendor.paidAmount = Number(cfOrder.order_amount) || newPlan.price;
+    vendor.paidAt = new Date();
+
+    await vendor.save();
+
+    // Create UserSubscription entry for invoice and purchase history
+    let userSub;
+    try {
+      userSub = await UserSubscription.create({
+        userId: vendor._id,
+        subscriptionId: newPlan._id,
+        priceAtPurchase: newPlan.price,
+        branchCount: newPlan.branchCount || 0,
+        featuresAtPurchase: newPlan.features || {},
+        startDate:
+          upgradeType === "after_current" &&
+          vendor.planEndDate &&
+          new Date(vendor.planEndDate) > now
+            ? new Date(vendor.planEndDate)
+            : now,
+        endDate: newPlanEndDate,
+        paymentStatus: "Paid",
+        orderId,
+        paymentId,
+      });
+    } catch (subErr) {
+      console.error("Error creating UserSubscription record:", subErr);
+    }
+
+    // Admin Notification
+    try {
+      await Notification.create({
+        userId: vendor._id,
+        userModel: "MainVendor",
+        senderName: vendor.name,
+        title: "Plan Upgraded Successfully",
+        message: `Vendor ${vendor.name} has upgraded to ${newPlan.name} (₹${cfOrder.order_amount}). Plan active till ${newPlanEndDate.toLocaleDateString()}.`,
+        type: "plan_upgrade",
+        recipient: "admin",
+      });
+    } catch (e) {
+      console.error("Notification error:", e);
+    }
+
+    // Send Upgrade Success Email to Vendor
+    try {
+      const emailContent = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Plan Upgraded Successfully</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" border="0" 
+                 style="background:#ffffff; margin:40px 0; border-radius:8px; overflow:hidden;">
+            <tr>
+              <td align="center" style="background:#27ae60; padding:25px; color:#ffffff;">
+                <h1 style="margin:0; font-size:24px;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                <p style="margin:5px 0 0; font-size:14px;">Plan Upgrade Successful</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px; color:#333333;">
+                <h2 style="margin-top:0;">Hello ${vendor.name},</h2>
+                <p>Your subscription plan has been successfully upgraded to <strong>${newPlan.name}</strong>!</p>
+                <p>Your new plan is now active with all upgraded features and limits.</p>
+                
+                <h3 style="margin-top:20px; margin-bottom:10px;">Upgrade Details:</h3>
+                <table width="100%" cellpadding="8" cellspacing="0" style="background:#f8f9fa; border-radius:6px; margin-bottom:20px;">
+                  <tr>
+                    <td><strong>Upgraded Plan:</strong></td>
+                    <td>${newPlan.name}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Amount Paid:</strong></td>
+                    <td>₹${cfOrder.order_amount}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Order ID:</strong></td>
+                    <td>${orderId}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Timing Choice:</strong></td>
+                    <td>${upgradeType === "from_today" ? "Started from Today" : "Continues After Previous Expiry"}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Valid Till:</strong></td>
+                    <td><strong>${newPlanEndDate.toLocaleDateString()}</strong></td>
+                  </tr>
+                </table>
+                
+                <div style="text-align:center; margin:30px 0;">
+                  <a href="${(process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system").replace(/\/$/, "")}/mainvendor" 
+                     style="background:#F39C12; color:#ffffff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
+                    Go to Your Dashboard
+                  </a>
+                </div>
+                
+                <p>Thank you for continuing with ${process.env.COMPANY_NAME || "AuctionBilling"}!</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="background:#f1f1f1; padding:20px; font-size:12px; color:#777;">
+                <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+      `;
+
+      const emailSubject = await getTemplateSubject(
+        "main_vendor_plan_updated",
+        `Plan Upgraded: ${newPlan.name} is now active!`
+      );
+      await sendEmail(vendor.email, emailSubject, emailContent);
+    } catch (emailErr) {
+      console.error("Upgrade confirmation email error:", emailErr);
+    }
+
+    res.status(200).json({
+      status: true,
+      message: `Plan upgraded to ${newPlan.name} successfully! Valid till ${newPlanEndDate.toLocaleDateString()}.`,
+      plan: newPlan,
+      planEndDate: newPlanEndDate,
+    });
+  } catch (error) {
+    console.error("Verify and upgrade error:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
+  }
+};
+
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -1345,14 +2471,19 @@ exports.getMainVendorProfile = async (req, res) => {
         .json({ status: false, message: "Main vendor not found" });
     }
 
-    // Find their currently active subscription
-    const activeSub = await UserSubscription.findOne({
+    // Find their latest subscription record (active or expired)
+    const latestSub = await UserSubscription.findOne({
       userId: vendor._id,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() }
-    }).sort({ createdAt: -1 });
+    }).sort({ endDate: -1, createdAt: -1 });
+
+    // If main vendor has planEndDate, respect that as the source of truth for expiry
+    if (vendor.planEndDate) {
+      if (latestSub) {
+        latestSub.endDate = vendor.planEndDate;
+      }
+    }
     
-    vendor.activeSubscription = activeSub;
+    vendor.activeSubscription = latestSub;
 
     delete vendor.password;
 
@@ -1754,3 +2885,184 @@ exports.logout = async (req, res) => {
     res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
+
+/**
+ * Admin Manually Extends Plan Expiry Date & Time for a Main Vendor
+ */
+exports.extendVendorPlan = async (req, res) => {
+  try {
+    const { vendorId, extendDays, targetDateTime, reason } = req.body;
+
+    if (!vendorId) {
+      return res.status(400).json({ status: false, message: "Vendor ID is required." });
+    }
+
+    const vendor = await MainVendor.findById(vendorId).populate("plan");
+    if (!vendor) {
+      return res.status(404).json({ status: false, message: "Vendor not found." });
+    }
+
+    const now = new Date();
+    let newExpiryDate;
+
+    if (targetDateTime) {
+      newExpiryDate = new Date(targetDateTime);
+      if (isNaN(newExpiryDate.getTime())) {
+        return res.status(400).json({ status: false, message: "Invalid target date/time provided." });
+      }
+    } else if (extendDays) {
+      const daysNum = Number(extendDays);
+      if (isNaN(daysNum) || daysNum <= 0) {
+        return res.status(400).json({ status: false, message: "Please provide a valid number of days." });
+      }
+
+      // Base date: if current planEndDate is in the future, add to it; otherwise add to now
+      const baseDate = vendor.planEndDate && new Date(vendor.planEndDate) > now
+        ? new Date(vendor.planEndDate)
+        : new Date(now);
+
+      baseDate.setDate(baseDate.getDate() + daysNum);
+      newExpiryDate = baseDate;
+    } else {
+      return res.status(400).json({ status: false, message: "Please provide days to extend or a target date/time." });
+    }
+
+    // Save extended date to vendor
+    vendor.planEndDate = newExpiryDate;
+    vendor.status = "Active"; // Ensure active
+    vendor.isPlanExtended = true;
+    vendor.planExtendedAt = new Date();
+    await vendor.save();
+
+    // Update or create the latest UserSubscription record
+    const latestSub = await UserSubscription.findOne({ userId: vendor._id }).sort({ endDate: -1, createdAt: -1 });
+    if (latestSub) {
+      latestSub.endDate = newExpiryDate;
+      if (!latestSub.featuresAtPurchase) {
+        latestSub.featuresAtPurchase = vendor.plan?.features || { planExtension: true };
+      }
+      await latestSub.save();
+    } else if (vendor.plan) {
+      await UserSubscription.create({
+        userId: vendor._id,
+        subscriptionId: vendor.plan._id,
+        priceAtPurchase: vendor.plan.price || 0,
+        branchCount: vendor.plan.branchCount || 0,
+        featuresAtPurchase: vendor.plan.features || { planExtension: true },
+        startDate: now,
+        endDate: newExpiryDate,
+        paymentStatus: "Paid",
+      });
+    }
+
+    // Format formatted date & time in Indian 12-hour AM/PM format
+    const formattedDateTime = newExpiryDate.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    // Create Notification
+    try {
+      await Notification.create({
+        userId: vendor._id,
+        userModel: "MainVendor",
+        senderName: "Administrator",
+        title: "Subscription Plan Extended",
+        message: `Your subscription has been manually extended until ${formattedDateTime}.`,
+        type: "plan_extended",
+        recipient: "vendor",
+      });
+    } catch (notifErr) {
+      console.error("Notification error:", notifErr);
+    }
+
+    // Send Confirmation Email to Vendor
+    try {
+      const emailSubject = `Subscription Plan Extended - Valid Till ${formattedDateTime}`;
+      const emailContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Plan Extended by Admin</title>
+      </head>
+      <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; margin:40px 0; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <tr>
+                  <td align="center" style="background:#10b981; padding:25px; color:#ffffff;">
+                    <h1 style="margin:0; font-size:24px;">${process.env.COMPANY_NAME || "AuctionBilling"}</h1>
+                    <p style="margin:5px 0 0; font-size:14px;">Plan Extended by Administrator</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:30px; color:#333333;">
+                    <h2 style="margin-top:0; color:#1e293b;">Hello ${vendor.name},</h2>
+                    <p>Good news! Your subscription plan has been extended by our administration team.</p>
+                    
+                    <h3 style="margin-top:20px; margin-bottom:10px; color:#1e293b;">Extension Details:</h3>
+                    <table width="100%" cellpadding="10" cellspacing="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:20px;">
+                      <tr>
+                        <td style="color:#64748b; font-size:14px;"><strong>Plan Name:</strong></td>
+                        <td style="color:#0f172a; font-size:14px;"><strong>${vendor.plan?.name || "Active Plan"}</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="color:#64748b; font-size:14px;"><strong>New Expiry Date &amp; Time:</strong></td>
+                        <td style="color:#059669; font-size:15px; font-weight:bold;">${formattedDateTime} (IST)</td>
+                      </tr>
+                      ${reason ? `
+                      <tr>
+                        <td style="color:#64748b; font-size:14px;"><strong>Admin Note / Reason:</strong></td>
+                        <td style="color:#0f172a; font-size:14px;">${reason}</td>
+                      </tr>` : ""}
+                    </table>
+                    
+                    <div style="text-align:center; margin:30px 0;">
+                      <a href="${(process.env.CLIENT_URL || "http://localhost:5173/auction-billing-system").replace(/\/$/, "")}/mainvendor" 
+                         style="background:#10b981; color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+                        Access Your Dashboard
+                      </a>
+                    </div>
+                    
+                    <p style="color:#64748b; font-size:13px; line-height:1.5;">If you have any questions or need further assistance, please contact our support team.</p>
+                    <br/>
+                    <p>Warm regards,<br/><strong>${process.env.COMPANY_NAME || "AuctionBilling"} Team</strong></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="background:#f1f5f9; padding:20px; font-size:12px; color:#64748b;">
+                    <p style="margin:0;">© ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "AuctionBilling"}. All rights reserved.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+      `;
+
+      await sendEmail(vendor.email, emailSubject, emailContent);
+    } catch (emailErr) {
+      console.error("Plan extension email error:", emailErr);
+    }
+
+    res.status(200).json({
+      status: true,
+      message: `Plan successfully extended till ${formattedDateTime}!`,
+      newPlanEndDate: newExpiryDate,
+      formattedDateTime,
+    });
+  } catch (error) {
+    console.error("Extend vendor plan error:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
+  }
+};
+

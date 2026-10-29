@@ -50,22 +50,24 @@ module.exports = async (req, res, next) => {
           accountInactive: true,
         });
       }
+      // If plan is expired, block modifying requests (POST, PUT, DELETE, PATCH)
+      // except subscription payment/upgrade routes, but allow GET requests so vendor can browse & view
       if (
         mainVendor.planEndDate &&
         new Date() > new Date(mainVendor.planEndDate)
       ) {
-        if (decoded.sessionId) {
-          await Session.updateOne(
-            { sessionId: decoded.sessionId, isActive: true },
-            { isActive: false },
-          );
+        const isSubscriptionRoute = req.originalUrl.includes("subscription") || 
+                                    req.originalUrl.includes("upgrade") ||
+                                    req.originalUrl.includes("profile");
+        const isModifyingMethod = ["POST", "PUT", "DELETE", "PATCH"].includes(req.method);
+
+        if (isModifyingMethod && !isSubscriptionRoute) {
+          return res.status(403).json({
+            status: false,
+            message: "Your subscription plan has expired. Please renew to perform actions.",
+            actionBlocked: true,
+          });
         }
-        return res.status(403).json({
-          status: false,
-          message:
-            "Your subscription plan has expired. Please renew to continue.",
-          planExpired: true,
-        });
       }
     }
 
@@ -145,6 +147,12 @@ module.exports = async (req, res, next) => {
           message: "Session timed out due to inactivity. Please login again.",
           sessionExpired: true,
         });
+      }
+
+      // Update lastActivity on active API requests (throttled to once every 1 minute)
+      if (diffMinutes >= 1) {
+        session.lastActivity = now;
+        await session.save();
       }
     }
 

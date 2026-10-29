@@ -448,3 +448,16 @@ export const exportMainVendorPurchases = async (filters) => {
     throw error;
   }
 };
+
+export const extendVendorPlanApi = async (data) => {
+  try {
+    const response = await api.post("/main-vendor/extend-plan", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+

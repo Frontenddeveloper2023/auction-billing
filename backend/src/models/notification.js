@@ -23,6 +23,7 @@ const notificationSchema = new mongoose.Schema(
       enum: [
         "asset_upgrade",
         "plan_upgrade",
+        "plan_extended",
         "new_registration",
         "subscription_alert",
         "system",

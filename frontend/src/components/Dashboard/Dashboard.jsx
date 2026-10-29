@@ -75,15 +75,6 @@ function Dashboard() {
     },
   ];
 
-  const accountItems = [
-    {
-      title: "Change Password",
-      icon: KeyRound,
-      path: "/vendor/change-password",
-      theme: "menu-theme-amber",
-    },
-  ];
-
   return (
     <>
       <div className="content-header">
@@ -171,32 +162,10 @@ function Dashboard() {
               })}
             </div>
           </div>
-
-          {/* Account Section */}
-          <div className="dashboard-menu-section">
-            <h3 className="dashboard-menu-heading">Account</h3>
-            <div className="dashboard-menu-grid">
-              {accountItems.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Link
-                    key={item.title}
-                    to={item.path}
-                    className={`dashboard-menu-card ${item.theme}`}
-                  >
-                    <div className="dashboard-menu-icon-box">
-                      <IconComponent size={20} strokeWidth={2.1} />
-                    </div>
-                    <span className="dashboard-menu-label">{item.title}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
     </>
   );
-}
+};
 
 export default Dashboard;

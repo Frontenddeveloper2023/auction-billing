@@ -1,9 +1,106 @@
 import api from "./api";
 
-// Main Vendor Signup
+// Main Vendor Signup (Free / Direct)
 export const mainVendorSignup = async (data) => {
   try {
     const response = await api.post("/main-vendor/signup", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Create Cashfree Payment Order
+export const createVendorPaymentOrder = async (data) => {
+  try {
+    const response = await api.post("/main-vendor/create-payment-order", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Verify Cashfree Payment and Register
+export const verifyAndRegisterVendor = async (data) => {
+  try {
+    const response = await api.post("/main-vendor/verify-and-signup", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Checkout Details from Email Link
+export const getVendorCheckoutDetails = async (vendorId) => {
+  try {
+    const response = await api.get(`/main-vendor/checkout-details/${vendorId}`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Create Cashfree Order for Email Link Checkout
+export const createVendorCheckoutOrderApi = async (data) => {
+  try {
+    const response = await api.post("/main-vendor/checkout-create-order", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Verify Payment for Email Link Checkout
+export const verifyVendorCheckoutPaymentApi = async (data) => {
+  try {
+    const response = await api.post("/main-vendor/checkout-verify-payment", data);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Create Cashfree Payment Order for Upgrade/Renewal
+export const createUpgradePaymentOrder = async (data) => {
+  try {
+    const response = await api.post(
+      "/main-vendor/create-upgrade-payment-order",
+      data
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw error.response.data;
+    }
+    throw error;
+  }
+};
+
+// Verify Cashfree Payment and Upgrade Plan
+export const verifyAndUpgradePlan = async (data) => {
+  try {
+    const response = await api.post(
+      "/main-vendor/verify-and-upgrade-plan",
+      data
+    );
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) {

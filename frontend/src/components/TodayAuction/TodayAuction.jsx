@@ -650,7 +650,7 @@ function TodayAuction() {
           </div>
         </div>
 
-        <div className="card-list fade-in">
+        <div className="table-container-full fade-in">
           {loading ? (
             <LoadingSpinner message="Loading today's auction..." />
           ) : products.length === 0 ? (
@@ -662,7 +662,7 @@ function TodayAuction() {
             </div>
           ) : (
             <div className="table-responsive bg-card rounded-lg shadow-sm custom-table-wrapper">
-              <table className="data-table custom-data-table">
+              <table className="data-table custom-data-table today-auction-table">
                 <thead className="bg-tertiary">
                   <tr>
                     <th className="custom-th">Product Details</th>
@@ -700,7 +700,7 @@ function TodayAuction() {
                         key={product._id || product.id}
                         className={`${product.isActive === false ? "product-disabled" : ""} custom-tr`}
                       >
-                        <td className="custom-td">
+                        <td className="custom-td custom-td-product" data-label="Product Details">
                           <div className="font-semibold text-primary table-product-name">
                             {capitalizeFirst(product.name)}
                           </div>
@@ -731,7 +731,7 @@ function TodayAuction() {
                             </div>
                           )}
                         </td>
-                        <td className="custom-td">
+                        <td className="custom-td custom-td-seller" data-label="Seller">
                           <strong>
                             {
                               sellers.find(
@@ -740,7 +740,7 @@ function TodayAuction() {
                             }
                           </strong>
                         </td>
-                        <td className="custom-td">
+                        <td className="custom-td custom-td-status" data-label="Status">
                           {product.status === "soldout" ? (
                             <span className="badge badge-error">Sold Out</span>
                           ) : product.isActive === false ? (
@@ -753,7 +753,7 @@ function TodayAuction() {
                             </span>
                           )}
                         </td>
-                        <td className="custom-td">
+                        <td className="custom-td custom-td-center custom-td-actions" data-label="Actions">
                           <div className="action-stack">
                             <button
                               className="btn btn-success action-btn-wide"

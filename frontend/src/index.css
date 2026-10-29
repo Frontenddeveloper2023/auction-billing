@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./components/Common/DataTable.css";
 
 :root {
   /* 🌟 Brand / Accent Colors (Amber) */
@@ -460,7 +461,7 @@ tr:hover {
   align-items: center;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

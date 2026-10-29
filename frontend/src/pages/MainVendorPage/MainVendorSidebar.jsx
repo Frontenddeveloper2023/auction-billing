@@ -48,11 +48,11 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           </div>
           <div className="logo-text">
             <h2>Auction Billing</h2>
-            <p>Vendor</p>
+            <p>Vendor Portal</p>
           </div>
         </div>
-        <button className="close-sidebar" onClick={onClose}>
-          <X size={24} />
+        <button className="close-sidebar" onClick={onClose} aria-label="Close Sidebar" title="Close Sidebar">
+          <X size={18} strokeWidth={2.2} />
         </button>
       </div>
 
@@ -64,7 +64,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <House />
+            <House size={18} strokeWidth={2} />
           </span>
           <span>Dashboard</span>
         </NavLink>
@@ -77,7 +77,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <span className="nav-icon">
-                <Building />
+                <Building size={18} strokeWidth={2} />
               </span>
               <span>Branches</span>
             </NavLink>
@@ -88,7 +88,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <span className="nav-icon">
-                <UserCog />
+                <UserCog size={18} strokeWidth={2} />
               </span>
               <span>Sellers</span>
             </NavLink>
@@ -99,7 +99,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <span className="nav-icon">
-                <ShoppingCart />
+                <ShoppingCart size={18} strokeWidth={2} />
               </span>
               <span>Buyers</span>
             </NavLink>
@@ -110,7 +110,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <span className="nav-icon">
-                <Handshake />
+                <Handshake size={18} strokeWidth={2} />
               </span>
               <span>Commission</span>
             </NavLink>
@@ -121,7 +121,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <span className="nav-icon">
-                <History />
+                <History size={18} strokeWidth={2} />
               </span>
               <span>History</span>
             </NavLink>
@@ -136,7 +136,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <PackagePlus />
+            <PackagePlus size={18} strokeWidth={2} />
           </span>
           <span>Product List</span>
         </NavLink>
@@ -147,7 +147,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <ChartSpline />
+            <ChartSpline size={18} strokeWidth={2} />
           </span>
           <span>Today Auction</span>
         </NavLink>
@@ -158,7 +158,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <PackageSearch />
+            <PackageSearch size={18} strokeWidth={2} />
           </span>
           <span>Pending Products</span>
         </NavLink>
@@ -169,7 +169,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <FileText />
+            <FileText size={18} strokeWidth={2} />
           </span>
           <span>Billing & Invoices</span>
         </NavLink>
@@ -180,7 +180,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <UserCog />
+            <UserCog size={18} strokeWidth={2} />
           </span>
           <span>My Sellers</span>
         </NavLink>
@@ -191,7 +191,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <ShoppingCart />
+            <ShoppingCart size={18} strokeWidth={2} />
           </span>
           <span>My Buyers</span>
         </NavLink>
@@ -202,7 +202,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <Handshake />
+            <Handshake size={18} strokeWidth={2} />
           </span>
           <span>My Commission</span>
         </NavLink>
@@ -213,7 +213,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <History />
+            <History size={18} strokeWidth={2} />
           </span>
           <span>My History</span>
         </NavLink>
@@ -226,7 +226,7 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <Gem />
+            <Gem size={18} strokeWidth={2} />
           </span>
           <span>Subscription</span>
         </NavLink>
@@ -237,14 +237,14 @@ const MainVendorSidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <span className="nav-icon">
-            <User />
+            <User size={18} strokeWidth={2} />
           </span>
           <span>Profile</span>
         </NavLink>
 
         <a href="/" className="nav-item text-danger" onClick={handleLogout}>
           <span className="nav-icon">
-            <LogOut />
+            <LogOut size={18} strokeWidth={2} />
           </span>
           <span>Logout</span>
         </a>

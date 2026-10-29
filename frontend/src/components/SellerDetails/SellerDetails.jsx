@@ -771,22 +771,15 @@ function SellerDetails() {
               </>
             )}
           </div>
-          {selectedSeller ? (
-            <button
-              className="btn btn-secondary"
-              onClick={handleBackToSellers}
-            >
-              <span>←</span> Back to List
-            </button>
-          ) : (
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowAddModal(true)}
-            >
-              <Plus size={16} />
-              <span>Add Seller</span>
-            </button>
-          )}
+        {!selectedSeller && (
+  <button
+    className="btn btn-primary"
+    onClick={() => setShowAddModal(true)}
+  >
+    <Plus size={16} />
+    <span>Add Seller</span>
+  </button>
+)}
         </div>
       </div>
 
@@ -983,28 +976,10 @@ function SellerDetails() {
               </div>
             </div>
 
-            <div
-              className="detail-actions-bar"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1.5rem",
-                gap: "1rem",
-                flexWrap: "wrap",
-                background: "white",
-                padding: "0.75rem 1.25rem",
-                borderRadius: "10px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-              }}
-            >
-              <div
-                className="filter-controls"
-                style={{ display: "flex", gap: "10px", alignItems: "center" }}
-              >
+            <div className="detail-actions-bar">
+              <div className="filter-controls">
                 <select
-                  className="form-control"
-                  style={{ width: "150px", fontWeight: "500" }}
+                  className="form-control filter-select"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 >
@@ -1015,22 +990,17 @@ function SellerDetails() {
                 </select>
 
                 {dateFilter !== "all" && dateFilter !== "today" && (
-                  <div
-                    className="fade-in"
-                    style={{ display: "flex", gap: "8px" }}
-                  >
+                  <div className="filter-date-inputs fade-in">
                     <input
                       type="date"
-                      className="form-control"
-                      style={{ width: "135px" }}
+                      className="form-control filter-date-input"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     {dateFilter === "range" && (
                       <input
                         type="date"
-                        className="form-control"
-                        style={{ width: "135px" }}
+                        className="form-control filter-date-input"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                       />
@@ -1039,36 +1009,22 @@ function SellerDetails() {
                 )}
               </div>
 
-              <div
-                className="action-buttons"
-                style={{ display: "flex", gap: "10px" }}
-              >
-                
+              <div className="action-buttons seller-detail-actions">
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-secondary action-btn-responsive"
                   onClick={openCommissionModal}
                 >
-                  <Edit2 size={16} style={{ marginRight: "5px" }} /> Customize Commission
+                  <Edit2 size={16} />
+                  <span>Customize Commission</span>
                 </button>
 
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary action-btn-responsive"
                   onClick={openGlobalPaymentModal}
                 >
-                  <Plus size={16} style={{ marginRight: "5px" }} /> Pay Out
+                  <Plus size={16} />
+                  <span>Pay Out</span>
                 </button>
-                {/* <button
-                  className="btn btn-secondary"
-                  title="Download PDF"
-                  onClick={handleDownloadPDF}
-                  disabled={fetchingPdf}
-                >
-                  {fetchingPdf ? (
-                    <Loader size={18} className="spin" />
-                  ) : (
-                    <Download size={18} />
-                  )}
-                </button> */}
               </div>
             </div>
 
@@ -1326,13 +1282,7 @@ function SellerDetails() {
                     <small className="field-error">{formErrors.email}</small>
                   )}
                 </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">State</label>
                     <SearchableSelect
@@ -1456,53 +1406,43 @@ function SellerDetails() {
                   gap: "20px",
                 }}
               >
-                <div style={{ display: "flex", gap: "20px" }}>
-                  <div className="product-info-details" style={{ flex: 1 }}>
-                    <div
-                      className="stats-grid"
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "10px",
-                        marginBottom: "20px",
-                        background: "#f8f9fa",
-                        padding: "15px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div>
-                        Product Name: <b>{viewingProduct.name}</b>
+                <div className="product-view-summary">
+                  <div className="product-info-details">
+                    <div className="stats-grid product-stats-grid">
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Product Name</span>
+                        <b className="product-stat-val">{viewingProduct.name}</b>
                       </div>
-                      <div>
-                        Total Sales:{" "}
-                        <b>
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Total Sales</span>
+                        <b className="product-stat-val">
                           ₹{(viewingProduct.stats?.price || 0).toLocaleString()}
                         </b>
                       </div>
-                      <div>
-                        Commission:{" "}
-                        <b>
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Commission</span>
+                        <b className="product-stat-val">
                           ₹
                           {(
                             viewingProduct.stats?.commission || 0
                           ).toLocaleString()}
                         </b>
                       </div>
-                      <div>
-                        Total To Amount:{" "}
-                        <b>
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Total To Amount</span>
+                        <b className="product-stat-val">
                           ₹{(viewingProduct.stats?.net || 0).toLocaleString()}
                         </b>
                       </div>
-                      <div className="text-success">
-                        Total Paid:{" "}
-                        <b>
+                      <div className="product-stat-box text-success">
+                        <span className="product-stat-label">Total Paid</span>
+                        <b className="product-stat-val">
                           ₹{(viewingProduct.stats?.paid || 0).toLocaleString()}
                         </b>
                       </div>
-                      <div className="text-error">
-                        Total Balance:{" "}
-                        <b>
+                      <div className="product-stat-box text-error">
+                        <span className="product-stat-label">Total Balance</span>
+                        <b className="product-stat-val">
                           ₹
                           {(
                             viewingProduct.stats?.balance || 0
@@ -1596,8 +1536,8 @@ function SellerDetails() {
                         />
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '15px', marginTop: '15px' }}>
-                        <div className="form-group" style={{ flex: 1 }}>
+                    <div className="commission-date-row">
+                        <div className="form-group flex-1">
                             <label className="form-label">Valid From</label>
                             <input
                                 type="date"
@@ -1608,10 +1548,10 @@ function SellerDetails() {
                             />
                         </div>
 
-                        <div className="form-group" style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <label className="form-label" style={{ marginBottom: 0 }}>Valid Until</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <div className="form-group flex-1">
+                            <div className="commission-valid-until-header">
+                                <label className="form-label">Valid Until</label>
+                                <div className="forever-toggle-wrap">
                                     <input
                                         type="checkbox"
                                         id="foreverToggle"
@@ -1619,7 +1559,7 @@ function SellerDetails() {
                                         onChange={(e) => setCommissionData({...commissionData, forever: e.target.checked})}
                                         disabled={commissionData.commissionPercent === ""}
                                     />
-                                    <label htmlFor="foreverToggle" style={{ fontSize: '13px', margin: 0 }}>Forever</label>
+                                    <label htmlFor="foreverToggle">Forever</label>
                                 </div>
                             </div>
                             <input
@@ -1865,13 +1805,7 @@ function SellerDetails() {
                     <small className="field-error">{formErrors.email}</small>
                   )}
                 </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">State</label>
                     <SearchableSelect

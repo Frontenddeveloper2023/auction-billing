@@ -855,28 +855,10 @@ function BuyerDetails() {
               </div>
             </div>
 
-            <div
-              className="detail-actions-bar"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "1.5rem",
-                gap: "1rem",
-                flexWrap: "wrap",
-                background: "white",
-                padding: "0.75rem 1.25rem",
-                borderRadius: "10px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-              }}
-            >
-              <div
-                className="filter-controls"
-                style={{ display: "flex", gap: "10px", alignItems: "center" }}
-              >
+            <div className="detail-actions-bar">
+              <div className="filter-controls">
                 <select
-                  className="form-control"
-                  style={{ width: "150px", fontWeight: "500" }}
+                  className="form-control filter-select"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 >
@@ -887,22 +869,17 @@ function BuyerDetails() {
                 </select>
 
                 {dateFilter !== "all" && dateFilter !== "today" && (
-                  <div
-                    className="fade-in"
-                    style={{ display: "flex", gap: "8px" }}
-                  >
+                  <div className="filter-date-inputs fade-in">
                     <input
                       type="date"
-                      className="form-control"
-                      style={{ width: "135px" }}
+                      className="form-control filter-date-input"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     {dateFilter === "range" && (
                       <input
                         type="date"
-                        className="form-control"
-                        style={{ width: "135px" }}
+                        className="form-control filter-date-input"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                       />
@@ -911,25 +888,14 @@ function BuyerDetails() {
                 )}
               </div>
 
-              <div
-                className="action-buttons"
-                style={{ display: "flex", gap: "10px" }}
-              >
-                <button className="btn btn-primary" onClick={openPaymentModal}>
-                  <Plus size={16} style={{ marginRight: "5px" }} /> Pay In
-                </button>
-                {/* <button
-                  className="btn btn-secondary"
-                  title="Download PDF"
-                  onClick={handleDownloadPDF}
-                  disabled={fetchingPdf}
+              <div className="action-buttons buyer-detail-actions">
+                <button
+                  className="btn btn-primary action-btn-responsive"
+                  onClick={openPaymentModal}
                 >
-                  {fetchingPdf ? (
-                    <Loader size={18} className="spin" />
-                  ) : (
-                    <Download size={18} />
-                  )}
-                </button> */}
+                  <Plus size={16} />
+                  <span>Pay In</span>
+                </button>
               </div>
             </div>
 
@@ -1208,29 +1174,20 @@ function BuyerDetails() {
                   gap: "20px",
                 }}
               >
-                <div style={{ display: "flex", gap: "20px" }}>
-                  <div className="product-info-details" style={{ flex: 1 }}>
-                    <div
-                      className="stats-grid"
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "10px",
-                        marginBottom: "20px",
-                        background: "#f8f9fa",
-                        padding: "15px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div>
-                        Product Name: <b>{viewingTransaction.productName}</b>
+                <div className="product-view-summary">
+                  <div className="product-info-details">
+                    <div className="stats-grid product-stats-grid">
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Product Name</span>
+                        <b className="product-stat-val">{viewingTransaction.productName}</b>
                       </div>
-                      <div>
-                        Date: <b>{formatDate(viewingTransaction.date)}</b>
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Date</span>
+                        <b className="product-stat-val">{formatDate(viewingTransaction.date)}</b>
                       </div>
-                      <div>
-                        Bill Amount:{" "}
-                        <b>
+                      <div className="product-stat-box">
+                        <span className="product-stat-label">Bill Amount</span>
+                        <b className="product-stat-val">
                           ₹{viewingTransaction.finalAmount?.toLocaleString()}
                         </b>
                       </div>
@@ -1383,13 +1340,7 @@ function BuyerDetails() {
                     </small>
                   )}
                 </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">State</label>
                     <SearchableSelect
@@ -1567,13 +1518,7 @@ function BuyerDetails() {
                     </small>
                   )}
                 </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "0.75rem",
-                  }}
-                >
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label">State</label>
                     <SearchableSelect

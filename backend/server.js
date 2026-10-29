@@ -6,11 +6,13 @@ const seedAdmin = require("./src/utils/seedAdmin");
 const cron = require("node-cron");
 const backupMongoDB = require("./src/utils/backup");
 const PORT = process.env.PORT;
-// Auto Backup Every 1 Hour
-cron.schedule("* * * * *", () => {
-  console.log("Running every 1 minute...");
-  backupMongoDB();
-});
+// Auto Backup Every 1 Hour (Disabled in local dev unless ENABLE_BACKUP=true)
+if (process.env.NODE_ENV === "production" || process.env.ENABLE_BACKUP === "true") {
+  cron.schedule("0 * * * *", () => {
+    console.log("Running hourly MongoDB backup...");
+    backupMongoDB();
+  });
+}
 // Allow app to start even if DB fails
 connectDB()
   .then(() => {

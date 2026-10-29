@@ -4,7 +4,7 @@ import MainVendorSidebar from "./MainVendorSidebar.jsx";
 import "./MainVendor.css";
 import logo from "../../assets/images/logo.png";
 import user from "../../assets/images/user.png";
-import { LogOut, User, KeyRound, ArrowLeft } from "lucide-react";
+import { LogOut, User, KeyRound, ArrowLeft, CalendarDays } from "lucide-react";
 import { googleLogout } from "@react-oauth/google";
 import { useSelector, useDispatch } from "react-redux";
 import { clearVendorAuthData, setVendorBranchCount } from "../../redux/slices/vendorAuthSlice.js";
@@ -12,6 +12,7 @@ import { resolveImageUrl } from "../../utils/imageUtils.js";
 import { getMainVendorProfile, mainVendorLogout } from "../../api/mainVendorApi.js";
 import Notification from "../../components/Common/Notification.jsx";
 import BottomNavbar from "../../components/Common/BottomNavbar.jsx";
+import { toast } from "react-toastify";
 
 const MainVendorLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -56,6 +57,9 @@ const MainVendorLayout = () => {
     navigate("/");
   };
 
+  // Subscription info for the top banner across all pages
+  const [subStatus, setSubStatus] = useState(null);
+
   // Subscription check - adjust for mainVendor
   useEffect(() => {
     const checkSubscription = async () => {
@@ -70,7 +74,8 @@ const MainVendorLayout = () => {
             
             dispatch(setVendorBranchCount(latestBranchCount));
 
-            const expiryDate = activeSub?.endDate || currentVendor.planEndDate;
+            const expiryDate = currentVendor.planEndDate || activeSub?.endDate;
+            const planName = activeSub?.planName || currentVendor.plan?.planName || currentVendor.planName || "Active Plan";
 
             if (expiryDate) {
               const today = new Date();
@@ -78,9 +83,54 @@ const MainVendorLayout = () => {
               const diffTime = expiry - today;
               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+              const isExtended = !!currentVendor.isPlanExtended;
+              const extendedAt = currentVendor.planExtendedAt;
+
               if (diffDays <= 0) {
-                console.log("Subscription expired");
-                handleLogout();
+                console.log("Subscription expired: Read-only mode activated");
+                setSubStatus({
+                  planName,
+                  expiryDate,
+                  diffDays: 0,
+                  isExpired: true,
+                  isExpiringSoon: false,
+                  isExtended: false,
+                });
+                // Do not logout! User can still browse and view pages, and access subscription page.
+              } else {
+                setSubStatus({
+                  planName,
+                  expiryDate,
+                  diffDays,
+                  isExpired: false,
+                  isExpiringSoon: diffDays <= 7,
+                  isExtended,
+                  extendedAt,
+                });
+
+                // Show Toast Immediately once when plan was extended by admin
+                if (isExtended) {
+                  const toastKey = `plan_extended_notified_${new Date(expiryDate).getTime()}`;
+                  if (sessionStorage.getItem(toastKey) !== "shown") {
+                    sessionStorage.setItem(toastKey, "shown");
+                    const formattedExpiry = new Date(expiryDate).toLocaleString("en-IN", {
+                      timeZone: "Asia/Kolkata",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    });
+                    toast.success(
+                      `🎉 Plan Extended! Your plan has been extended till ${formattedExpiry}.`,
+                      {
+                        toastId: "plan-extended-toast",
+                        autoClose: 6000,
+                      }
+                    );
+                  }
+                }
               }
             }
           }
@@ -92,6 +142,40 @@ const MainVendorLayout = () => {
 
     checkSubscription();
   }, [isLoggedIn, currentVendorId]);
+
+  const lastToastTimeRef = useRef(0);
+
+  // Capture clicks when plan is expired on any page except subscription
+  const handleMainContentClickCapture = (e) => {
+    if (!subStatus?.isExpired) return;
+
+    // Subscription page is fully accessible for renewals/upgrades
+    if (location.pathname.startsWith("/mainvendor/subscription")) return;
+
+    // Check if the click target is or is inside an interactive action element (button, input, form submit, etc.)
+    const actionEl = e.target.closest(
+      'button, a:not([href^="/mainvendor"]):not([href*="mainvendor"]), input, select, textarea, [role="button"], .btn, .action-btn, .btn-primary, .btn-danger, .btn-success, .edit-btn, .delete-btn'
+    );
+
+    if (actionEl) {
+      // If it's a navigation link inside the app, allow viewing
+      if (actionEl.tagName === "A" && actionEl.getAttribute("href")?.startsWith("/")) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const now = Date.now();
+      if (now - lastToastTimeRef.current > 2500) {
+        lastToastTimeRef.current = now;
+        toast.warning("Plan expired. Please renew subscription to perform actions.", {
+          toastId: "plan-expired-warning",
+          autoClose: 3000,
+        });
+      }
+    }
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -139,6 +223,24 @@ const MainVendorLayout = () => {
       navigate(-1);
     } else {
       navigate("/mainvendor/dashboard");
+    }
+  };
+
+  const formatExpiryDate = (d) => {
+    if (!d) return "";
+    try {
+      const dt = new Date(d);
+      return dt.toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return String(d);
     }
   };
 
@@ -198,16 +300,6 @@ const MainVendorLayout = () => {
                   <span>My Profile</span>
                 </div>
                 <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    navigate("/mainvendor/change-password");
-                    setProfileOpen(false);
-                  }}
-                >
-                  <KeyRound size={16} />
-                  <span>Change Password</span>
-                </div>
-                <div
                   className="dropdown-item text-danger"
                   onClick={handleLogout}
                 >
@@ -220,6 +312,41 @@ const MainVendorLayout = () => {
         </div>
       </div>
 
+      {/* Global Plan Expiry Top Banner (Visible across all pages, No buttons) */}
+      {subStatus && (
+        <div className={`mv-top-expiry-strip ${subStatus.isExpired ? "expired" : subStatus.isExpiringSoon ? "expiring" : "active"}`}>
+          <div className="mv-strip-badge">
+            <CalendarDays size={14} />
+            <span>
+              {subStatus.isExpired
+                ? "Expired"
+                : subStatus.isExtended
+                ? `Extended (${subStatus.diffDays}d Left)`
+                : `${subStatus.diffDays} Days Left`}
+            </span>
+          </div>
+          <div className="mv-strip-text">
+            <strong>
+              {subStatus.isExpired
+                ? `Subscription Expired (${subStatus.planName})`
+                : subStatus.isExtended
+                ? `Plan Extended (${subStatus.planName})`
+                : `Plan Active (${subStatus.planName})`}
+            </strong>
+            <span className="mv-strip-divider">•</span>
+            <span>
+              {subStatus.isExpired
+                ? "Your subscription cycle has ended."
+                : subStatus.isExtended
+                ? `Extended till ${formatExpiryDate(subStatus.expiryDate)} (${subStatus.diffDays} days remaining)`
+                : subStatus.isExpiringSoon
+                  ? `Valid till ${formatExpiryDate(subStatus.expiryDate)}. Only ${subStatus.diffDays} days remaining.`
+                  : `Valid till ${formatExpiryDate(subStatus.expiryDate)} (${subStatus.diffDays} days remaining)`}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar Overlay */}
       <div
         className={`sidebar-overlay ${sidebarOpen ? "show" : ""}`}
@@ -230,7 +357,10 @@ const MainVendorLayout = () => {
       <MainVendorSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       {/* Main Content */}
-      <main className="main-content">
+      <main
+        className={`main-content ${subStatus?.isExpired && !location.pathname.startsWith("/mainvendor/subscription") ? "plan-expired-mode" : ""}`}
+        onClickCapture={handleMainContentClickCapture}
+      >
         <Outlet />
       </main>
 

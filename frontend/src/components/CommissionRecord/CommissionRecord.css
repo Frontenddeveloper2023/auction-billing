@@ -390,7 +390,8 @@
         border-bottom: 2px solid var(--border-color);
         margin-bottom: 12px;
         background-color: var(--bg-secondary);
-        border-radius: 10px;
+        border-radius: 12px;
+        border-left: 3.5px solid var(--primary-amber) !important;
         padding: 4px 0;
         box-shadow: var(--shadow-sm);
     }
@@ -398,11 +399,12 @@
     .commission-table td.custom-td {
         border: none;
         border-bottom: 1px solid var(--border-color);
-        position: relative;
-        padding-left: 46%;
-        padding-top: 11px;
-        padding-bottom: 11px;
-        text-align: right;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 10px 14px !important;
+        text-align: right !important;
+        min-height: 42px;
     }
 
     .commission-table td.custom-td:last-child {
@@ -410,28 +412,24 @@
     }
 
     .commission-table td.custom-td::before {
-        position: absolute;
-        top: 11px;
-        left: 12px;
-        width: 40%;
-        padding-right: 8px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: 600;
+        font-size: 0.72rem;
+        font-weight: 700;
         color: var(--text-muted);
-        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.04em;
+        text-align: left;
+        flex-shrink: 0;
+        max-width: 48%;
     }
 
-    .commission-table td.custom-td:nth-of-type(1)::before { content: "Product"; }
-    .commission-table td.custom-td:nth-of-type(2)::before { content: "Seller"; }
-    .commission-table td.custom-td:nth-of-type(3)::before { content: "Date"; }
+    .commission-table td.custom-td:nth-of-type(1)::before { content: "Date"; }
+    .commission-table td.custom-td:nth-of-type(2)::before { content: "Product"; }
+    .commission-table td.custom-td:nth-of-type(3)::before { content: "Seller"; }
     .commission-table td.custom-td:nth-of-type(4)::before { content: "Sale Amount"; }
     .commission-table td.custom-td:nth-of-type(5)::before { content: "Comm %"; }
     .commission-table td.custom-td:nth-of-type(6)::before { content: "Earned"; }
 
-    /* Fix center col alignment on mobile so the 10% badge floats properly right */
+    /* Fix center col alignment on mobile so the badge floats properly right */
     .commission-table td.custom-td.cr-center-col {
         text-align: right !important;
     }

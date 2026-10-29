@@ -252,17 +252,17 @@ function Branches() {
               </thead>
               <tbody>
                 {branches.map((branch) => (
-                  <tr key={branch._id || branch.id}>
-                    <td className="custom-td">{branch.name}</td>
-                    <td className="custom-td">
+                  <tr key={branch._id || branch.id} className="custom-tr">
+                    <td className="custom-td" data-label="Name">{branch.name}</td>
+                    <td className="custom-td" data-label="Branch ID">
                       <span className="badge badge-outline-primary">
                         {branch.branchId}
                       </span>
                     </td>
-                    <td className="custom-td">
+                    <td className="custom-td" data-label="State / City">
                       {branch.state}, {branch.city}
                     </td>
-                    <td className="custom-td">
+                    <td className="custom-td" data-label="Status">
                       <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                         <label className="toggle-switch" style={{ marginRight: 0 }}>
                           <input
@@ -277,7 +277,8 @@ function Branches() {
                       </div>
                     </td>
                     <td
-                      className="custom-td"
+                      className="custom-td custom-td-center"
+                      data-label="Actions"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>

@@ -7,7 +7,7 @@ const userSubscriptionSchema = new mongoose.Schema({
     branchCount: { type: Number, default: 0 },
     featuresAtPurchase: { 
         type: mongoose.Schema.Types.Mixed, 
-        required: true 
+        default: {} 
     },
     startDate: { type: Date, default: Date.now },
     endDate: { type: Date, required: true },

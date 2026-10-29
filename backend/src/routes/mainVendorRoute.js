@@ -11,6 +11,11 @@ router.get("/", authMiddleware, mainVendorController.getMainVendors);
 router.post("/send-login-otp", mainVendorController.sendLoginOtp);
 router.post("/verify-login-otp", mainVendorController.verifyLoginOtp);
 router.post("/signup", mainVendorController.signup);
+router.post("/create-payment-order", mainVendorController.createPaymentOrder);
+router.post("/verify-and-signup", mainVendorController.verifyAndSignup);
+router.get("/checkout-details/:vendorId", mainVendorController.getVendorPaymentDetails);
+router.post("/checkout-create-order", mainVendorController.createVendorCheckoutOrder);
+router.post("/checkout-verify-payment", mainVendorController.verifyVendorCheckoutPayment);
 router.post("/login", mainVendorController.login);
 router.post("/logout", authMiddleware, mainVendorController.logout);
 
@@ -20,6 +25,21 @@ router.post(
   "/change-password",
   authMiddleware,
   mainVendorController.changePassword,
+);
+router.post(
+  "/create-upgrade-payment-order",
+  authMiddleware,
+  mainVendorController.createUpgradePaymentOrder,
+);
+router.post(
+  "/verify-and-upgrade-plan",
+  authMiddleware,
+  mainVendorController.verifyAndUpgradePlan,
+);
+router.post(
+  "/extend-plan",
+  authMiddleware,
+  mainVendorController.extendVendorPlan,
 );
 
 // Route to create a main vendor (Admin only)

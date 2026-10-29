@@ -15,6 +15,8 @@ exports.logout = async (req, res) => {
   }
 };
 
+
+
 exports.heartbeat = async (req, res) => {
   try {
     const { sessionId } = req.user;
@@ -50,7 +52,7 @@ exports.cleanupExpiredSessions = async (userType) => {
     {
       userType: userType,      // particular user type
       isActive: true,          // only active sessions
-      lastActivity: { $lt: cutoff } // last activity older than 5 min
+      lastActivity: { $lt: cutoff } // last activity older than 1 hour (60 min)
     },
     {
       $set: { isActive: false }

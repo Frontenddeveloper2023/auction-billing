@@ -1,0 +1,394 @@
+/* ==========================================================================
+   ENTERPRISE RESPONSIVE DATA TABLE SYSTEM
+   Classes: .data-table, .custom-data-table, .custom-table-wrapper, .table-responsive
+   Fully responsive across Desktop, Laptop, Tablet, and Mobile (down to 320px)
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. TABLE WRAPPER CONTAINER (DESKTOP & TABLET)
+   ────────────────────────────────────────────────────────────────────────── */
+.table-container-full {
+  width: 100% !important;
+  display: block !important;
+  grid-column: 1 / -1 !important;
+}
+
+.custom-table-wrapper,
+.table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  grid-column: 1 / -1 !important;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  margin-bottom: 1.25rem;
+  transition: border-color var(--transition-base, 250ms), box-shadow var(--transition-base, 250ms);
+}
+
+/* Failsafe: if wrapped inside any card-list grid, force 100% full span */
+.card-list > .table-responsive,
+.card-list > .custom-table-wrapper,
+.card-list > .table-container-full,
+.card-list > table {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+/* Custom slim modern scrollbar */
+.custom-table-wrapper::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.custom-table-wrapper::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--bg-tertiary, #f1f5f9);
+  border-radius: 4px;
+}
+
+.custom-table-wrapper::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.custom-table-wrapper::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-amber, #f59e0b);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. DESKTOP BASE TABLE STYLES (> 550px)
+   ────────────────────────────────────────────────────────────────────────── */
+.data-table,
+.custom-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  background-color: transparent;
+  font-family: inherit;
+}
+
+@media (min-width: 551px) {
+  .data-table,
+  .custom-data-table {
+    min-width: 580px;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. TABLE HEADERS (THEAD & TH)
+   ────────────────────────────────────────────────────────────────────────── */
+.data-table thead,
+.custom-data-table thead {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.data-table th,
+.custom-data-table th,
+.custom-data-table th.custom-th {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #475569;
+  border-bottom: 2px solid var(--border-color, #e2e8f0);
+  border-top: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+}
+
+/* Smooth top rounded corners */
+.data-table thead tr:first-child th:first-child,
+.custom-data-table thead tr:first-child th:first-child {
+  border-top-left-radius: 11px;
+}
+
+.data-table thead tr:first-child th:last-child,
+.custom-data-table thead tr:first-child th:last-child {
+  border-top-right-radius: 11px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. TABLE CELLS & ROWS (TBODY, TR, TD)
+   ────────────────────────────────────────────────────────────────────────── */
+.data-table td,
+.custom-data-table td,
+.custom-data-table td.custom-td {
+  padding: 13px 16px;
+  font-size: 0.875rem;
+  color: var(--text-primary, #0f172a);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  vertical-align: middle;
+  line-height: 1.5;
+  background-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.data-table tbody tr:last-child td,
+.custom-data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Elegant row transitions and hover states */
+.data-table tr.custom-tr,
+.custom-data-table tr.custom-tr,
+.data-table tbody tr,
+.custom-data-table tbody tr {
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.data-table tbody tr:hover,
+.custom-data-table tbody tr:hover,
+.data-table tr.custom-tr:hover,
+.custom-data-table tr.custom-tr:hover {
+  background-color: rgba(245, 158, 11, 0.035);
+}
+
+/* Alternating zebra row options */
+.data-table tr.row-even,
+.custom-data-table tr.row-even,
+.data-table tr.sb-row-even,
+.custom-data-table tr.sb-row-even,
+.data-table tr.cr-row-even,
+.custom-data-table tr.cr-row-even {
+  background-color: rgba(248, 250, 252, 0.65);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. ALIGNMENT & HELPER CLASSES
+   ────────────────────────────────────────────────────────────────────────── */
+.custom-th-center,
+.custom-td-center,
+.data-table th.center-col,
+.data-table td.center-col,
+.custom-data-table th.sb-center-col,
+.custom-data-table td.sb-center-col,
+.custom-data-table th.cr-center-col,
+.custom-data-table td.cr-center-col {
+  text-align: center !important;
+}
+
+.custom-th-num,
+.custom-td-num,
+.custom-th-right,
+.custom-td-right,
+.data-table th.num-col,
+.data-table td.num-col,
+.custom-data-table th.sb-num-col,
+.custom-data-table td.sb-num-col,
+.custom-data-table th.cr-num-col,
+.custom-data-table td.cr-num-col {
+  text-align: right !important;
+}
+
+.custom-data-table td.custom-td-variants {
+  min-width: 180px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. MOBILE RESPONSIVE CARD VIEW (≤ 550px)
+   Transforms each table row into an individual, executive-styled record card
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 550px) {
+  /* Unwrap table container on mobile so cards float cleanly with margin */
+  .custom-table-wrapper,
+  .table-responsive {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: 0 !important;
+  }
+
+  /* Block layout for table elements */
+  .data-table,
+  .custom-data-table,
+  .data-table thead,
+  .custom-data-table thead,
+  .data-table tbody,
+  .custom-data-table tbody,
+  .data-table tr,
+  .custom-data-table tr,
+  .data-table th,
+  .custom-data-table th,
+  .data-table td,
+  .custom-data-table td {
+    display: block !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Visually hide desktop header */
+  .data-table thead,
+  .custom-data-table thead {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Individual Record Cards */
+  .data-table tbody tr,
+  .custom-data-table tbody tr,
+  .data-table tr.custom-tr,
+  .custom-data-table tr.custom-tr {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 3.5px solid var(--primary-amber, #f59e0b) !important;
+    border-radius: 13px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+    overflow: hidden !important;
+    padding: 2px 0 !important;
+    box-sizing: border-box !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  .data-table tbody tr:hover,
+  .custom-data-table tbody tr:hover,
+  .data-table tr.custom-tr:hover,
+  .custom-data-table tr.custom-tr:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Key-Value Flex Rows */
+  .data-table td,
+  .custom-data-table td,
+  .custom-data-table td.custom-td {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    gap: 12px !important;
+    text-align: right !important;
+    background: transparent !important;
+  }
+
+  .data-table td:last-child,
+  .custom-data-table td:last-child,
+  .custom-data-table td.custom-td:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Responsive Labels via ::before */
+  .data-table td::before,
+  .custom-data-table td::before,
+  .custom-data-table td.custom-td::before {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    flex-shrink: 0 !important;
+    text-align: left !important;
+    max-width: 48% !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  /* Automatic support for data-label attribute */
+  .data-table td[data-label]::before,
+  .custom-data-table td[data-label]::before,
+  .custom-data-table td.custom-td[data-label]::before {
+    content: attr(data-label) !important;
+  }
+
+  /* Right-aligned cell values */
+  .data-table td > *,
+  .custom-data-table td > *,
+  .custom-data-table td.custom-td > * {
+    max-width: 100% !important;
+  }
+
+  /* Flex containers inside cells (actions, tags, buttons) */
+  .custom-data-table td.custom-td .action-stack,
+  .custom-data-table td.custom-td .action-icon-row,
+  .data-table td .action-stack,
+  .data-table td .action-icon-row {
+    display: inline-flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* Cells that require full-width block layout (e.g. variants, tags, wide text) */
+  .custom-data-table td.custom-td-variants,
+  .custom-data-table td.custom-td-stacked,
+  .custom-data-table td.custom-td-product,
+  .custom-data-table td.custom-td:has(.product-variants),
+  .custom-data-table td.custom-td:has(.tag-container) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    text-align: left !important;
+    gap: 8px !important;
+  }
+
+  .custom-data-table td.custom-td-variants::before,
+  .custom-data-table td.custom-td-stacked::before,
+  .custom-data-table td.custom-td-product::before,
+  .custom-data-table td.custom-td:has(.product-variants)::before,
+  .custom-data-table td.custom-td:has(.tag-container)::before {
+    max-width: 100% !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* Unconstrain nested scroll boxes on mobile (e.g. Subscription invoices) */
+  .sb-invoice-scroll {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7. TINY SCREEN PROTECTION (≤ 380px down to 320px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 380px) {
+  .data-table td,
+  .custom-data-table td,
+  .custom-data-table td.custom-td {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    font-size: 0.8rem !important;
+    min-height: 38px !important;
+  }
+
+  .data-table td::before,
+  .custom-data-table td::before,
+  .custom-data-table td.custom-td::before {
+    font-size: 0.675rem !important;
+    max-width: 44% !important;
+  }
+
+  .data-table tbody tr,
+  .custom-data-table tbody tr,
+  .data-table tr.custom-tr,
+  .custom-data-table tr.custom-tr {
+    border-radius: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .icon-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}

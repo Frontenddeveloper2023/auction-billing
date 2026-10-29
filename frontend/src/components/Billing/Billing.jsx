@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -18,6 +20,7 @@ import SearchableSelect from "../Common/SearchableSelect";
 import LoadingSpinner from "../Common/LoadingSpinner";
 import BackButton from "../Common/BackButton";
 import "./Billing.css";
+
 
 const Billing = () => {
   const { vendorId } = useSelector((state) => state.vendorAuth);
@@ -211,6 +214,7 @@ const Billing = () => {
       });
       yPos += 5;
 
+
       doc.setFont("helvetica", "normal");
 
       const records = data.records || [];
@@ -366,6 +370,7 @@ const Billing = () => {
         doc.text(`Contact: ${data.seller.contact}`, 10, yPos + 11);
         doc.text(`Address: ${data.seller.address || "N/A"}`, 10, yPos + 16);
         yPos += 25;
+        
       } else if (mainOption === "buyer" && data.buyer) {
         doc.setFontSize(14);
         doc.text("BUYER DETAILS", 10, yPos);
@@ -428,6 +433,7 @@ const Billing = () => {
           "Bal",
           "Method",
         ],
+
         buyer_purchase: [
           "Date",
           "Product",
@@ -451,6 +457,7 @@ const Billing = () => {
           "Comm %",
           "Comm Amt",
         ],
+
         ledger: ["Date", "Description", "Credit", "Debit", "Balance"],
       };
 

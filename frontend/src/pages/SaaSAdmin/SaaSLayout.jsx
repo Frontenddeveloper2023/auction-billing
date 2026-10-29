@@ -25,6 +25,7 @@ import {
   Lock,
   ExternalLink,
   Mail,
+  CalendarPlus,
 } from "lucide-react";
 import "./SaaSAdmin.css";
 
@@ -148,14 +149,14 @@ const SaaSLayout = () => {
       label: "Subscriptions",
       icon: <Gem size={20} />,
     },
+    {
+      path: "/saas/plan-extension",
+      label: "Plan Extension",
+      icon: <CalendarPlus size={20} />,
+    },
     { path: "/saas/subadmins", label: "Sub-Admins", icon: <Users size={20} /> },
     { path: "/saas/templates", label: "Template", icon: <Mail size={20} /> },
     { path: "/saas/settings", label: "Profile", icon: <User size={20} /> },
-    {
-      path: "/saas/change-password",
-      label: "Change Password",
-      icon: <Lock size={20} />,
-    },
   ];
 
   if (isSubAdmin) {
@@ -163,8 +164,6 @@ const SaaSLayout = () => {
       if (item.path === "/saas/settings") return false;
       if (item.path === "/saas/subadmins") return false;
       if (item.path === "/saas/templates") return false;
-      // Always allow sub-admins to change their own password
-      if (item.path === "/saas/change-password") return true;
       return true;
     });
   }
@@ -184,8 +183,10 @@ const SaaSLayout = () => {
           <button
             className="saas-close-sidebar"
             onClick={() => setIsSidebarOpen(false)}
+            aria-label="Close Sidebar"
+            title="Close Sidebar"
           >
-            <X size={24} />
+            <X size={18} strokeWidth={2.2} />
           </button>
         </div>
 

@@ -320,28 +320,28 @@ function History() {
                 ) : (
                   filteredTransactions.map((t) => (
                     <tr key={t._id || t.id} className="hs-tr">
-                      <td className="hs-td">
+                      <td className="hs-td" data-label="Date">
                         <span className="cr-date-badge">
                           {formatDate(t.date)}
                         </span>
                       </td>
-                      <td className="hs-td">
+                      <td className="hs-td" data-label="Product">
                         <div className="font-semibold text-primary">
                           {t.productName}
                         </div>
                       </td>
-                      <td className="hs-td">{t.sellerName}</td>
-                      <td className="hs-td">{t.buyerName}</td>
-                      <td className="hs-td hs-num-col">
+                      <td className="hs-td" data-label="Seller">{t.sellerName}</td>
+                      <td className="hs-td" data-label="Buyer">{t.buyerName}</td>
+                      <td className="hs-td hs-num-col" data-label="Qty">
                         <span className="hs-qty-text">{t.quantity}</span>
                         <small className="text-muted ml-1">{t.unit}</small>
                       </td>
-                      <td className="hs-td hs-num-col">
+                      <td className="hs-td hs-num-col" data-label="Total">
                         <span className="font-bold">
                           ₹{t.finalAmount.toLocaleString()}
                         </span>
                       </td>
-                      <td className="hs-td hs-num-col">
+                      <td className="hs-td hs-num-col" data-label="Comm.">
                         <span className="text-amber">
                           ₹{t.commissionAmount.toLocaleString()}
                         </span>

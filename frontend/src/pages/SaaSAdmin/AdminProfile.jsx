@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSaasAuthData } from '../../redux/slices/saasAuthSlice';
-import { User, Camera, Edit, X, Loader, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { User, Camera, Edit, X, Loader, Lock, Eye, EyeOff, ShieldCheck, Mail, Check } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { updateAdminProfile, sendAdminEmailUpdateOtp, verifyAdminPassword } from '../../api/adminApi';
 import './SaaSAdmin.css';
@@ -178,39 +178,61 @@ const AdminProfile = () => {
       <div className="fade-in">
         <div className="saas-card saas-profile-container">
           <div className="saas-card-header saas-profile-header-wrap">
-            <h3 className="saas-text-lg saas-font-semibold">Security Verification</h3>
+            <div className="saas-profile-header-title">
+              <Lock size={22} className="saas-text-primary" />
+              <h3 className="saas-text-lg saas-font-semibold">Security Verification</h3>
+            </div>
           </div>
-          <div className="saas-modal-content">
-            <p className="saas-text-muted saas-mb-20">Please enter your current password to authorize changing your email address.</p>
-            <div className="saas-form-group">
+          <div className="saas-modal-content saas-profile-body">
+            <p className="saas-profile-step-desc">
+              Please enter your current password to authorize changing your email address.
+            </p>
+            <form onSubmit={(e) => { e.preventDefault(); handleVerifyPassword(); }}>
+              <div className="saas-form-group">
                 <label className="saas-label">Current Password</label>
                 <div className="saas-input-container">
-                    <Lock size={18} className="saas-input-icon" />
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        className="saas-input saas-input-with-icon"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder="Enter current password"
-                    />
-                    <button
-                        type="button"
-                        className="saas-password-toggle"
-                        onClick={() => setShowPassword(!showPassword)}
-                    >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                  <Lock size={18} className="saas-input-icon" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className="saas-input saas-input-with-icon"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="saas-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
-            </div>
-            
-            <div className="saas-profile-actions">
-                <button className="saas-btn btn-outline saas-profile-action-btn" onClick={() => setEmailUpdateStep(0)} disabled={isLoading}>
-                    Cancel
+              </div>
+
+              <div className="saas-profile-actions">
+                <button
+                  type="button"
+                  className="saas-btn btn-outline saas-profile-action-btn"
+                  onClick={() => setEmailUpdateStep(0)}
+                  disabled={isLoading}
+                >
+                  <X size={16} /> Cancel
                 </button>
-                <button className="saas-btn btn-primary saas-flex-1" onClick={handleVerifyPassword} disabled={isLoading}>
-                    {isLoading ? <><Loader className="saas-spinner" size={16} /> Verifying...</> : 'Verify Password'}
+                <button
+                  type="submit"
+                  className="saas-btn btn-primary saas-flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <><Loader className="saas-spinner" size={16} /> Verifying...</>
+                  ) : (
+                    <><Lock size={16} /> Verify Password</>
+                  )}
                 </button>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -222,33 +244,54 @@ const AdminProfile = () => {
       <div className="fade-in">
         <div className="saas-card saas-profile-container">
           <div className="saas-card-header saas-profile-header-wrap">
-            <h3 className="saas-text-lg saas-font-semibold">Verify New Email</h3>
+            <div className="saas-profile-header-title">
+              <ShieldCheck size={22} className="saas-text-primary" />
+              <h3 className="saas-text-lg saas-font-semibold">Verify New Email</h3>
+            </div>
           </div>
-          <div className="saas-modal-content">
-            <p className="saas-text-muted saas-mb-20">An OTP has been sent to {settings.adminEmail}. Please enter it below.</p>
-            <div className="saas-form-group">
+          <div className="saas-modal-content saas-profile-body">
+            <p className="saas-profile-step-desc">
+              An OTP has been sent to <strong className="saas-profile-email-highlight">{settings.adminEmail}</strong>. Please enter it below.
+            </p>
+            <form onSubmit={(e) => { e.preventDefault(); handleVerifyOtpAndSave(); }}>
+              <div className="saas-form-group">
                 <label className="saas-label">OTP Code</label>
                 <div className="saas-input-container">
-                    <ShieldCheck size={18} className="saas-input-icon" />
-                    <input
-                        type="text"
-                        className="saas-input saas-input-with-icon"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="6-digit OTP"
-                        maxLength="6"
-                    />
+                  <ShieldCheck size={18} className="saas-input-icon" />
+                  <input
+                    type="text"
+                    className="saas-input saas-input-with-icon saas-profile-otp-input"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="6-digit OTP"
+                    maxLength="6"
+                    autoFocus
+                  />
                 </div>
-            </div>
-            
-            <div className="saas-profile-actions">
-                <button className="saas-btn btn-outline saas-profile-action-btn" onClick={() => setEmailUpdateStep(0)} disabled={isLoading}>
-                    Cancel
+              </div>
+
+              <div className="saas-profile-actions">
+                <button
+                  type="button"
+                  className="saas-btn btn-outline saas-profile-action-btn"
+                  onClick={() => setEmailUpdateStep(0)}
+                  disabled={isLoading}
+                >
+                  <X size={16} /> Cancel
                 </button>
-                <button className="saas-btn btn-primary saas-flex-1" onClick={handleVerifyOtpAndSave} disabled={isLoading}>
-                    {isLoading ? <><Loader className="saas-spinner" size={16} /> Verifying...</> : 'Verify OTP & Save'}
+                <button
+                  type="submit"
+                  className="saas-btn btn-primary saas-flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <><Loader className="saas-spinner" size={16} /> Verifying...</>
+                  ) : (
+                    <><ShieldCheck size={16} /> Verify OTP & Save</>
+                  )}
                 </button>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -260,7 +303,7 @@ const AdminProfile = () => {
       <div className="saas-card saas-profile-container">
         <div className="saas-card-header saas-profile-header-wrap">
           <div className="saas-profile-header-title">
-            <User size={24} className="saas-text-primary" />
+            <User size={22} className="saas-text-primary" />
             <h3 className="saas-text-lg saas-font-semibold">Admin Profile</h3>
           </div>
           {!isEditing && (
@@ -269,76 +312,104 @@ const AdminProfile = () => {
             </button>
           )}
         </div>
-        <div className="saas-modal-content">
-
-          <div className="saas-text-center saas-mb-30">
-            {/* When uncommented: use img for photo (no inline style needed)
-               {settings.adminPhoto ? (
-                 <img src={settings.adminPhoto} alt="Profile" className="saas-settings-profile-photo-img" onClick={triggerFileInput} />
-               ) : (
-                 <div className="saas-settings-profile-photo" onClick={triggerFileInput}>
-                   SA
-                   <div className="saas-settings-camera-icon"><Camera size={14} /></div>
-                 </div>
-               )}
-             */}
-
-            {/* <input
+        <div className="saas-modal-content saas-profile-body">
+          <div className="saas-profile-avatar-banner">
+            <div
+              className={`saas-profile-avatar-circle ${isEditing ? 'saas-profile-avatar-editable' : ''}`}
+              onClick={isEditing ? triggerFileInput : undefined}
+              title={isEditing ? "Click to change photo" : undefined}
+            >
+              {settings.adminPhoto ? (
+                <img src={settings.adminPhoto} alt={settings.adminName} className="saas-profile-avatar-img" />
+              ) : (
+                <span>{(settings.adminName || "SA").substring(0, 2).toUpperCase()}</span>
+              )}
+              {isEditing && (
+                <div className="saas-profile-camera-badge" title="Change photo">
+                  <Camera size={13} />
+                </div>
+              )}
+            </div>
+            <input
               type="file"
               accept="image/*"
               ref={fileInputRef}
-              className="saas-hidden"
+              style={{ display: 'none' }}
               onChange={handlePhotoChange}
-            /> */}
-
+            />
             <h4 className="saas-profile-name">{settings.adminName}</h4>
             <p className="saas-profile-email">{settings.adminEmail}</p>
           </div>
 
-          <div className="saas-form-group">
-            <label className="saas-label">Admin Name</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="adminName"
-                className="saas-input"
-                value={settings.adminName}
-                onChange={handleChange}
-              />
-            ) : (
-              <div className="saas-profile-readonly">
-                {settings.adminName}
-              </div>
-            )}
-          </div>
-
-          <div className="saas-form-group">
-            <label className="saas-label">Admin Email</label>
-            {isEditing ? (
-              <input
-                type="email"
-                name="adminEmail"
-                className="saas-input"
-                value={settings.adminEmail}
-                onChange={handleChange}
-              />
-            ) : (
-              <div className="saas-profile-readonly">
-                {settings.adminEmail}
-              </div>
-            )}
-          </div>
-
-          {isEditing && (
-            <div className="saas-profile-actions">
-              <button className="saas-btn btn-outline saas-profile-action-btn" onClick={handleCancelClick} disabled={isLoading}>
-                <X size={16} /> Cancel
-              </button>
-              <button className="saas-btn btn-primary saas-flex-1" onClick={handleSave} disabled={isLoading}>
-                {isLoading ? <><Loader className="saas-spinner" size={16} /> Saving...</> : 'Save Changes'}
-              </button>
+          <form onSubmit={(e) => { e.preventDefault(); if (isEditing) handleSave(); }}>
+            <div className="saas-form-group">
+              <label className="saas-label">Admin Name</label>
+              {isEditing ? (
+                <div className="saas-input-container">
+                  <User size={18} className="saas-input-icon" />
+                  <input
+                    type="text"
+                    name="adminName"
+                    className="saas-input saas-input-with-icon"
+                    value={settings.adminName}
+                    onChange={handleChange}
+                    placeholder="Enter admin name"
+                  />
+                </div>
+              ) : (
+                <div className="saas-profile-readonly">
+                  <User size={16} className="saas-profile-readonly-icon" />
+                  <span>{settings.adminName}</span>
+                </div>
+              )}
             </div>
-          )}
+
+            <div className="saas-form-group">
+              <label className="saas-label">Admin Email</label>
+              {isEditing ? (
+                <div className="saas-input-container">
+                  <Mail size={18} className="saas-input-icon" />
+                  <input
+                    type="email"
+                    name="adminEmail"
+                    className="saas-input saas-input-with-icon"
+                    value={settings.adminEmail}
+                    onChange={handleChange}
+                    placeholder="Enter admin email"
+                  />
+                </div>
+              ) : (
+                <div className="saas-profile-readonly">
+                  <Mail size={16} className="saas-profile-readonly-icon" />
+                  <span>{settings.adminEmail}</span>
+                </div>
+              )}
+            </div>
+
+            {isEditing && (
+              <div className="saas-profile-actions">
+                <button
+                  type="button"
+                  className="saas-btn btn-outline saas-profile-action-btn"
+                  onClick={handleCancelClick}
+                  disabled={isLoading}
+                >
+                  <X size={16} /> Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="saas-btn btn-primary saas-flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <><Loader className="saas-spinner" size={16} /> Saving...</>
+                  ) : (
+                    <><Check size={16} /> Save Changes</>
+                  )}
+                </button>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </div>

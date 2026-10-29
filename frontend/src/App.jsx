@@ -6,6 +6,7 @@ import VendorChangePassword from "./pages/VendorPage/Login/VendorChangePassword.
 import SaasForgotPassword from "./pages/SaaSAdmin/SaasForgotPassword.jsx";
 import VendorLayout from "./pages/VendorPage/VendorLayout.jsx";
 import Signup from "./pages/VendorPage/Signup/Signup.jsx";
+import PaySubscription from "./pages/VendorPage/PaySubscription.jsx";
 import Dashboard from "./components/Dashboard/Dashboard.jsx";
 import AddProduct from "./components/AddProduct/AddProduct.jsx";
 import TodayAuction from "./components/TodayAuction/TodayAuction.jsx";
@@ -20,6 +21,7 @@ import SaaSDashboard from "./pages/SaaSAdmin/SaaSDashboard.jsx";
 import VendorManagement from "./pages/SaaSAdmin/VendorManagement.jsx";
 import Purchases from "./pages/SaaSAdmin/Purchases.jsx";
 import SubscriptionManagement from "./pages/SaaSAdmin/SubscriptionManagement.jsx";
+import PlanExtension from "./pages/SaaSAdmin/PlanExtension.jsx";
 import SubAdminManagement from "./pages/SaaSAdmin/SubAdminManagement.jsx";
 import AdminProfile from "./pages/SaaSAdmin/AdminProfile.jsx";
 import SaaSChangePassword from "./pages/SaaSAdmin/SaaSChangePassword.jsx";
@@ -66,10 +68,11 @@ function App() {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter basename={import.meta.env.VITE_BASE_URL}>
         <Routes>
-          {/* Vendor Login */}
+          {/* Vendor Login & Registration */}
           <Route path="/" element={<VendorLogin />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/pay-subscription" element={<PaySubscription />} />
 
           {/* Vendor area with nested routes */}
           <Route path="/vendor" element={<VendorLayout />}>
@@ -101,6 +104,7 @@ function App() {
             <Route path="purchases" element={<Purchases />} />
             <Route path="vendors" element={<VendorManagement />} />
             <Route path="subscriptions" element={<SubscriptionManagement />} />
+            <Route path="plan-extension" element={<PlanExtension />} />
             <Route path="subadmins" element={<SubAdminManagement />} />
             <Route path="templates" element={<EmailTemplates />} />
             <Route path="settings" element={<AdminProfile />} />

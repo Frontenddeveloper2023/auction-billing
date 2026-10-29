@@ -189,7 +189,7 @@ function PendingProducts() {
                     </div>
                 </div>
 
-                <div className="card-list fade-in">
+                <div className="table-container-full fade-in">
                     {loading ? (
                         <LoadingSpinner message="Loading pending products..." />
                     ) : pendingProducts.length === 0 ? (
@@ -222,13 +222,13 @@ function PendingProducts() {
                                         })
                                         .map(product => (
                                             <tr key={product._id || product.id} className="pending-product-card custom-tr">
-                                                <td className="custom-td">
+                                                <td className="custom-td" data-label="Product Details">
                                                     <div className="font-semibold text-primary table-product-name">
                                                         {product.name}
                                                     </div>
                                                     <span className="badge badge-disabled">Pending</span>
                                                 </td>
-                                                <td className="custom-td">
+                                                <td className="custom-td" data-label="Seller & Date">
                                                     <div style={{ marginBottom: '4px' }}>
                                                         <strong>{sellers.find(s => (s._id || s.id) === product.sellerId)?.name || 'Unknown'}</strong>
                                                     </div>
@@ -236,7 +236,7 @@ function PendingProducts() {
                                                         Created: {formatDate(product.date || product.createdAt)}
                                                     </div>
                                                 </td>
-                                                <td className="custom-td custom-td-variants">
+                                                <td className="custom-td custom-td-variants" data-label="Variants (Qty & Comm)">
                                                     <div className="product-variants">
                                                         {product.variants && product.variants.map(v => (
                                                             <div key={v._id || v.id} className="variant-card">
@@ -252,7 +252,7 @@ function PendingProducts() {
                                                         ))}
                                                     </div>
                                                 </td>
-                                                <td className="custom-td">
+                                                <td className="custom-td" data-label="Actions">
                                                     <div className="action-stack">
                                                         {/* <button
                                                             className="btn btn-error btn-pending-action action-btn-wide"

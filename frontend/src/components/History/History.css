@@ -177,19 +177,20 @@
         border-bottom: 2px solid var(--border-color);
         margin-bottom: 12px;
         background-color: var(--bg-secondary);
-        border-radius: 10px;
+        border-radius: 12px;
+        border-left: 3.5px solid var(--primary-amber) !important;
         padding: 4px 0;
         box-shadow: var(--shadow-sm);
     }
 
     .hs-data-table td.hs-td {
         border: none;
-        border-bottom: 1px dashed var(--border-color);
-        position: relative;
-        padding-left: 45%;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        text-align: right;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 10px 14px !important;
+        text-align: right !important;
         min-height: 40px;
     }
 
@@ -198,20 +199,17 @@
     }
 
     .hs-data-table td.hs-td::before {
-        position: absolute;
-        top: 10px;
-        left: 12px;
-        width: 40%;
-        padding-right: 8px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: 600;
+        font-size: 0.72rem;
+        font-weight: 700;
         color: var(--text-muted);
-        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.04em;
+        text-align: left;
+        flex-shrink: 0;
+        max-width: 48%;
     }
 
+    /* Fallback nth-of-type labels if data-label is absent */
     .hs-data-table td.hs-td:nth-of-type(1)::before { content: "Date"; }
     .hs-data-table td.hs-td:nth-of-type(2)::before { content: "Product"; }
     .hs-data-table td.hs-td:nth-of-type(3)::before { content: "Seller"; }

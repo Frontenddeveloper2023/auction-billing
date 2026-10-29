@@ -220,7 +220,7 @@ function AddProduct() {
 
 
                 {/* Table */}
-                <div className="card-list fade-in">
+                <div className="table-container-full fade-in">
                     {loading ? (
                         <LoadingSpinner message="Loading products..." />
                     ) : filteredProducts.length === 0 ? (
@@ -246,26 +246,26 @@ function AddProduct() {
                                 <tbody>
                                     {filteredProducts.map(item => (
                                         <tr key={item._id || item.id} className="custom-tr">
-                                            <td className="custom-td">
+                                            <td className="custom-td" data-label="Product Name">
                                                 <div className="font-semibold text-primary table-product-name">
                                                     {item.name}
                                                 </div>
                                             </td>
-                                            <td className="custom-td">
+                                            <td className="custom-td custom-td-stacked" data-label="Varieties">
                                                 <div className="tag-container">
                                                     {(item.varieties || []).map((v, idx) => (
                                                         <span key={idx} className="variety-tag">{v}</span>
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="custom-td">
+                                            <td className="custom-td custom-td-stacked" data-label="Quantity Types">
                                                 <div className="tag-container">
                                                     {(item.units || []).map((u, idx) => (
                                                         <span key={idx} className="unit-tag">{u}</span>
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="custom-td">
+                                            <td className="custom-td custom-td-center" data-label="Actions">
                                                 <div className="action-stack">
                                                     <div className="action-icon-row">
                                                         <button

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
-import { formatDate } from "../../utils/dateUtils";
+import { formatDate, formatDateTime } from "../../utils/dateUtils";
 import "./SaaSAdmin.css";
 import ConfirmationModal from "../../components/Common/ConfirmationModal.jsx";
 import { useSelector } from "react-redux";
@@ -35,11 +35,11 @@ const VendorManagement = () => {
   const [plans, setPlans] = useState([]);
   const { saasRole, saasPermissions } = useSelector((state) => state.saasAuth);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 550);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 550);
+      setIsMobile(window.innerWidth <= 768);
     };
 
     window.addEventListener("resize", handleResize);
@@ -104,6 +104,8 @@ const VendorManagement = () => {
     city: "",
     state: "",
     plan: "",
+    isTrial: false,
+    trialDays: "7",
     status: "Active",
   };
 
@@ -119,22 +121,39 @@ const VendorManagement = () => {
   };
 
   const resetAddForm = () => {
-    setNewVendor(initialNewVendor);
+    setNewVendor({
+      ...initialNewVendor,
+      plan: plans.length > 0 ? plans[0]._id : "",
+    });
   };
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
+
+    if (newVendor.isTrial) {
+      const days = parseInt(newVendor.trialDays, 10);
+      if (isNaN(days) || days < 1) {
+        toast.error("Free trial days must be at least 1 (0 or negative days not allowed).");
+        return;
+      }
+    } else {
+      if (!newVendor.plan) {
+        toast.error("Please select a subscription plan.");
+        return;
+      }
+    }
+
     setIsSavingAdd(true);
     try {
       const formData = new FormData();
       Object.keys(newVendor).forEach((key) => {
         formData.append(key, newVendor[key]);
       });
-      await createMainVendor(formData);
+      const res = await createMainVendor(formData);
       setIsAddModalOpen(false);
       resetAddForm();
       loadData();
-      toast.success("Vendor added successfully");
+      toast.success(res?.message || "Vendor added successfully");
     } catch (error) {
       console.error(error);
       toast.error(error?.message || "Error adding vendor");
@@ -432,6 +451,10 @@ const VendorManagement = () => {
       matchesStatus &&
       matchesPlan
     );
+  }).sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.joinedDate || 0).getTime();
+    const timeB = new Date(b.createdAt || b.joinedDate || 0).getTime();
+    return timeB - timeA;
   });
 
   const handleUpgradeAction = async () => {
@@ -731,6 +754,7 @@ const VendorManagement = () => {
                 <th>Email</th>
                 <th>Location</th>
                 <th>Phone</th>
+                <th>Date & Time</th>
                 <th>Status</th>
                 {canManageVendors && <th>Action</th>}
               </tr>
@@ -738,7 +762,7 @@ const VendorManagement = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="saas-text-center saas-py-4">
+                  <td colSpan={canManageVendors ? "7" : "6"} className="saas-text-center saas-py-4">
                     <Loader
                       className="saas-spinner saas-inline-block"
                       size={24}
@@ -748,7 +772,7 @@ const VendorManagement = () => {
                 </tr>
               ) : filteredVendors.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="saas-text-center saas-py-4">
+                  <td colSpan={canManageVendors ? "7" : "6"} className="saas-text-center saas-py-4">
                     No vendors found.
                   </td>
                 </tr>
@@ -795,6 +819,9 @@ const VendorManagement = () => {
                         </svg>
                         {vendor.phone}
                       </a>
+                    </td>
+                    <td className="saas-whitespace-nowrap">
+                      {formatDateTime(vendor.createdAt || vendor.joinedDate)}
                     </td>
                     <td>
                       <span
@@ -860,26 +887,31 @@ const VendorManagement = () => {
                   className="saas-mobile-card"
                   onClick={() => handleRowClick(vendor)}
                 >
-                  <div className="saas-mobile-card-row">
-                    <span className="saas-mobile-card-label">Name</span>
-                    <div className="saas-mobile-card-value saas-font-bold">
-                      <div
-                        className="saas-flex saas-align-center saas-gap-05"
-                        style={{ justifyContent: "flex-end" }}
-                      >
-                        {vendor.name}
-                        {vendor.requestedPlan && (
-                          <span
-                            className="saas-badge badge-warning"
-                            style={{ fontSize: "10px" }}
-                            title="Plan Upgrade Requested"
-                          >
-                            Upgrade Req.
-                          </span>
-                        )}
-                      </div>
+                  <div className="saas-mobile-card-header">
+                    <div className="saas-mobile-card-title-group">
+                      <h4 className="saas-mobile-card-name">{vendor.name}</h4>
+                      {vendor.requestedPlan && (
+                        <span
+                          className="saas-badge badge-warning saas-badge-sm"
+                          title="Plan Upgrade Requested"
+                        >
+                          Upgrade Req.
+                        </span>
+                      )}
                     </div>
+                    <span
+                      className={`saas-badge ${
+                        vendor.status === "Active"
+                          ? "badge-success"
+                          : vendor.status === "Pending"
+                            ? "badge-warning"
+                            : "badge-danger"
+                      }`}
+                    >
+                      {vendor.status}
+                    </span>
                   </div>
+
                   <div className="saas-mobile-card-row">
                     <span className="saas-mobile-card-label">Email</span>
                     <span
@@ -904,53 +936,58 @@ const VendorManagement = () => {
                         rel="noopener noreferrer"
                         className="saas-whatsapp-link"
                         onClick={(e) => e.stopPropagation()}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
                       >
-                        {vendor.phone}
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="15"
+                          height="15"
+                          fill="currentColor"
+                          className="wa-icon"
+                          style={{ flexShrink: 0 }}
+                        >
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 0 5.414 0 12.05c0 2.123.552 4.197 1.598 6.02L0 24l6.125-1.606a11.81 11.81 0 005.923 1.586h.006c6.634 0 12.048-5.414 12.048-12.05a11.75 11.75 0 00-3.525-8.498z" />
+                        </svg>
+                        <span>{vendor.phone}</span>
                       </a>
                     </span>
                   </div>
                   <div className="saas-mobile-card-row">
-                    <span className="saas-mobile-card-label">Status</span>
-                    <span className="saas-mobile-card-value">
-                      <span
-                        className={`saas-badge ${
-                          vendor.status === "Active"
-                            ? "badge-success"
-                            : vendor.status === "Pending"
-                              ? "badge-warning"
-                              : "badge-danger"
-                        }`}
-                      >
-                        {vendor.status}
-                      </span>
+                    <span className="saas-mobile-card-label">Date & Time</span>
+                    <span className="saas-mobile-card-value saas-font-medium">
+                      {formatDateTime(vendor.createdAt || vendor.joinedDate)}
                     </span>
                   </div>
+
                   {canManageVendors && (
                     <div
-                      className="saas-mobile-card-row"
+                      className="saas-mobile-card-actions"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <span className="saas-mobile-card-label">Actions</span>
-                      <div className="saas-flex saas-gap-10px">
-                        <button
-                          className="icon-btn edit"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditClick(vendor);
-                          }}
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          className="icon-btn delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(vendor);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        className="saas-mobile-btn saas-mobile-btn-edit"
+                        title="Edit Vendor"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(vendor);
+                        }}
+                      >
+                        <Edit size={15} />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="saas-mobile-btn saas-mobile-btn-delete"
+                        title="Delete Vendor"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(vendor);
+                        }}
+                      >
+                        <Trash2 size={15} />
+                        <span>Delete</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1017,21 +1054,161 @@ const VendorManagement = () => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="saas-label">Plan</label>
-                    <select
-                      name="plan"
-                      value={newVendor.plan}
-                      onChange={handleInputChangeSimple}
-                      className="saas-select"
+                  {/* Account Type Toggle Selection */}
+                  <div className="form-group full-width" style={{ marginTop: "6px", marginBottom: "6px" }}>
+                    <label className="saas-label" style={{ fontWeight: "700", marginBottom: "8px", display: "block" }}>
+                      Subscription Setup *
+                    </label>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "12px",
+                      }}
                     >
-                      {plans.map((p) => (
-                        <option key={p._id} value={p._id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
+                      {/* Option 1: Free Trial Toggle Card */}
+                      <div
+                        onClick={() => {
+                          setNewVendor((prev) => ({
+                            ...prev,
+                            isTrial: true,
+                            trialDays: prev.trialDays && parseInt(prev.trialDays, 10) > 0 ? prev.trialDays : "7",
+                          }));
+                        }}
+                        style={{
+                          border: newVendor.isTrial ? "2px solid #10b981" : "1.5px solid #e2e8f0",
+                          background: newVendor.isTrial ? "#f0fdf4" : "#ffffff",
+                          padding: "12px 14px",
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="subscription_mode"
+                          checked={newVendor.isTrial === true}
+                          onChange={() => {
+                            setNewVendor((prev) => ({
+                              ...prev,
+                              isTrial: true,
+                              trialDays: prev.trialDays && parseInt(prev.trialDays, 10) > 0 ? prev.trialDays : "7",
+                            }));
+                          }}
+                          style={{ accentColor: "#10b981", width: "18px", height: "18px", cursor: "pointer" }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: "700", fontSize: "0.92rem", color: newVendor.isTrial ? "#065f46" : "#334155" }}>
+                            Free Trial
+                          </div>
+                          <div style={{ fontSize: "0.76rem", color: "#64748b" }}>
+                            Direct login with custom trial days
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Option 2: Select Paid Plan Toggle Card */}
+                      <div
+                        onClick={() => {
+                          setNewVendor((prev) => ({
+                            ...prev,
+                            isTrial: false,
+                            plan: prev.plan || (plans.length > 0 ? plans[0]._id : ""),
+                          }));
+                        }}
+                        style={{
+                          border: !newVendor.isTrial ? "2px solid #F39C12" : "1.5px solid #e2e8f0",
+                          background: !newVendor.isTrial ? "#fffaf0" : "#ffffff",
+                          padding: "12px 14px",
+                          borderRadius: "10px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="subscription_mode"
+                          checked={newVendor.isTrial === false}
+                          onChange={() => {
+                            setNewVendor((prev) => ({
+                              ...prev,
+                              isTrial: false,
+                              plan: prev.plan || (plans.length > 0 ? plans[0]._id : ""),
+                            }));
+                          }}
+                          style={{ accentColor: "#F39C12", width: "18px", height: "18px", cursor: "pointer" }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: "700", fontSize: "0.92rem", color: !newVendor.isTrial ? "#b45309" : "#334155" }}>
+                            Select Paid Plan
+                          </div>
+                          <div style={{ fontSize: "0.76rem", color: "#64748b" }}>
+                            Email Pay Now button (via Cashfree)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Dynamic Input based on selection */}
+                  {newVendor.isTrial ? (
+                    /* Free Trial Days input: Only 1 and above allowed (no 0, no negative) */
+                    <div className="form-group full-width" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "12px 16px", borderRadius: "8px" }}>
+                      <label className="saas-label" style={{ color: "#166534", fontWeight: "700", marginBottom: "4px" }}>
+                        Enter Free Trial Days * <span style={{ fontWeight: "normal", fontSize: "0.78rem" }}>(Min: 1 Day • No 0 or negative days)</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="trialDays"
+                        min="1"
+                        step="1"
+                        className="saas-input"
+                        placeholder="e.g. 7, 14, 30 days"
+                        value={newVendor.trialDays}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "" || /^[1-9]\d*$/.test(val)) {
+                            setNewVendor((prev) => ({ ...prev, trialDays: val }));
+                          }
+                        }}
+                        required
+                        style={{ background: "#ffffff", borderColor: "#86efac" }}
+                      />
+                      <span style={{ fontSize: "0.75rem", color: "#15803d", marginTop: "4px", display: "block" }}>
+                        Vendor will receive an email with their login link and will be active immediately for this duration.
+                      </span>
+                    </div>
+                  ) : (
+                    /* Paid Plan Selection Dropdown */
+                    <div className="form-group full-width" style={{ background: "#fffaf0", border: "1px solid #fde68a", padding: "12px 16px", borderRadius: "8px" }}>
+                      <label className="saas-label" style={{ color: "#92400e", fontWeight: "700", marginBottom: "4px" }}>
+                        Choose Paid Plan *
+                      </label>
+                      <select
+                        name="plan"
+                        value={newVendor.plan}
+                        onChange={handleInputChangeSimple}
+                        className="saas-select"
+                        style={{ background: "#ffffff", borderColor: "#fcd34d" }}
+                        required
+                      >
+                        {plans.map((p) => (
+                          <option key={p._id} value={p._id}>
+                            {p.name} — ₹{p.price} ({p.durationValue} {p.durationType})
+                          </option>
+                        ))}
+                      </select>
+                      <span style={{ fontSize: "0.75rem", color: "#b45309", marginTop: "4px", display: "block" }}>
+                        Vendor will receive an email with a "Pay Now" button to complete their Cashfree payment before logging in.
+                      </span>
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label className="saas-label">State *</label>
@@ -1401,10 +1578,10 @@ const VendorManagement = () => {
                   </div>
                   <div>
                     <label className="saas-label saas-text-muted">
-                      Joined Date
+                      Joined Date & Time
                     </label>
                     <div className="saas-font-medium">
-                      {formatDate(selectedVendor.joinedDate)}
+                      {formatDateTime(selectedVendor.joinedDate || selectedVendor.createdAt)}
                     </div>
                   </div>
                   <div>
